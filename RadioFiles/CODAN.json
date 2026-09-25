@@ -1,0 +1,43 @@
+{
+    "autoTune": "TUNE AUTO\r",
+    "connectionMethod": "TCP",
+    "initialSetup": "scan off\r,scan off\r,echo off\rlogin admin ''\r",
+    "modeList": {
+        "USB": "MODE USB\r",
+        "LSB": "MODE LSB\r",
+        "CW": "MODE CW\r",
+        "AM": "MODE AM\r",
+        "DATA1": "MODE LSBW\r",
+        "DATA2": "MODE USBW\r",
+        "DATA3": "MODE USBW\r"
+    },
+    "pttData": "PTT ON DATA\r",
+    "pttOff": "PTT OFF\r",
+    "pttOn": "PTT ON\r",
+    "radioAddress": "192.168.234.1",
+    "radioName":"CODAN",
+    "queryCommands": {
+        "mode": "MODE\r",
+        "modeResponsePrefix": "MODE: ",
+        "vfo": "",
+        "vfoAFreq": "FREQ\r",
+        "vfoAResponse": "",
+        "vfoBFreq": "",
+        "vfoBResponse": ""
+    },"serialBaudRate": 38400,
+    "serialFlowControl": "No Flow Control",
+    "serialParams": "8N1",
+    "splitOff": "",
+    "splitOn": "",
+    "radioTcpPortNumber": 23,
+    "toVFOA": "connect tcvr rf 14000000 14000000\r",
+    "toVFOB": "connect tcvr rf 14000000 14000000\r",
+    "txTail": 20,    
+    "frequencyControl": {
+        "order": "NORMAL",
+        "numDigits": 8,
+        "prefixA": "CONNECT TCVR RF ",
+        "prefixB": "CONNECT TCVR RF ",
+        "suffix": "\r"
+    }
+}

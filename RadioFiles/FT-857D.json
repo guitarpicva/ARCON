@@ -1,0 +1,46 @@
+{
+    "autoTune": "",
+    "commandTimeout": 20,
+    "connectionMethod": "SERIAL",
+    "controlType": "BINARY",
+    "frequencyControl": {
+        "numDigits": 8,
+        "order": "BCD",
+        "prefixA": "",
+        "prefixB": "",
+        "suffix": "01"
+    },
+    "initialSetup": "0000000088,0100000007,0000000085,0000000082",
+    "modeList": {
+        "AM": "04ADBEEF07",
+        "CW": "02ADBEEF07",
+        "DATA1": "0AADBEEF07",
+        "DATA2": "0AADBEEF07",
+        "DATA3": "0AADBEEF07",
+        "LSB": "00ADBEEF07",
+        "RTTY": "0AADBEEF07",
+        "USB": "01ADBEEF07"
+    },
+    "portTimeout": 10,
+    "pttData": "0000000008",
+    "pttOff": "0000000088",
+    "pttOn": "0000000008",
+    "queryCommands": {
+        "mode": "0000000003",
+        "modeResponsePrefix": "",
+        "vfo": "",
+        "vfoAFreq": "0000000003",
+        "vfoAFreqResponse": "",
+        "vfoAResponse": "",
+        "vfoBFreq": "",
+        "vfoBFreqResponse": "",
+        "vfoBResponse": ""
+    },
+    "radioAddress": "TTYUSB0",
+    "radioName": "FT-857D",
+    "serialBaudRate": 38400,
+    "serialFlowControl": "No Flow Control",
+    "serialParams": "8N1",
+    "radioTcpPortNumber": 9873,
+    "txTail": 20
+}

@@ -1,0 +1,50 @@
+{
+    "autoTune": "PC010;SWH16;",
+    "commandTimeout": 50,
+    "connectionMethod": "SERIAL",
+    "frequencyControl": {
+        "numDigits": 10,
+        "order": "CAT",
+        "prefixA": "FA0",
+        "prefixB": "FB0",
+        "suffix": ";",
+        "toVFOA": "",
+        "toVFOB": ""
+    },
+    "initialSetup": "FT0,MD6,AI0",
+    "modeList": {
+        "AM": "MD5",
+        "CW": "MD3",
+        "DATA1": "MD9",
+        "DATA2": "MD6",
+        "DATA3": "",
+        "LSB": "MD1",
+        "RTTY": "",
+        "USB": "MD2"
+    },
+    "portTimeout": 40,
+    "pttData": "TX",
+    "pttOff": "RX",
+    "pttOn": "TX",
+    "queryCommands": {
+        "mode": "MD",
+        "modeResponsePrefix": "MD",
+        "vfo": "FT",
+        "vfoAFreq": "FA",
+        "vfoAFreqResponse": "FA0",
+        "vfoAResponse": "FT0",
+        "vfoBFreq": "FB",
+        "vfoBFreqResponse": "FB0",
+        "vfoBResponse": "FT1"
+    },
+    "radioAddress": "ttyUSB1",
+    "radioName": "KX-3",
+    "serialBaudRate": 38400,
+    "serialFlowControl": "No Flow Control",
+    "serialParams": "8N1",
+    "radioTcpPortNumber": 9873,
+    "toggleSplit": "SWH25;",
+    "toVFOA": "FR0",
+    "toVFOB": "FR1",
+    "txTail": 20
+}
