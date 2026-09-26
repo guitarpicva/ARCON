@@ -26,7 +26,6 @@ void main(List<String> arguments) {
   final ArgParser argParser = buildParser();
   try {
     final ArgResults results = argParser.parse(arguments);
-    bool verbose = false;
 
     // Process the parsed arguments.
     if (results.flag('help')) {
@@ -39,13 +38,12 @@ void main(List<String> arguments) {
     }
     // Act on the arguments provided.
     print('Positional arguments: ${results.rest}');
-    if (verbose) {
-      print('[VERBOSE] All arguments: ${results.arguments}');
-    }
   } on FormatException catch (e) {
     // Print usage information if an invalid argument was provided.
     print(e.message);
-    print('Usage: arcon [flags] [RSON radio file name]\n\nRadio filename must be the last parameter.');
+    print(
+      'Usage: arcon [flags] [RSON radio file name]\n\nRadio filename must be the last parameter.',
+    );
     printUsage(argParser);
   }
   // start the process with the radio filename gathered from
