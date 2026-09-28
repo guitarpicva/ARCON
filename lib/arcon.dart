@@ -23,21 +23,17 @@ class ARCON {
   String splitToggle = '';
   String toVFOA = '';
   String toVFOB = '';
-  String autoTune = '';
-  String modeQuery =
-      ''; // which mode is in use -- compare reply to modeList values
+  String autoTune = ''; // which mode is in use -- compare reply to modeList values
+  String modeQuery = '';
   String vfoQuery = ''; // which vfo is in use
   String vfoAFreq = ''; // query VFO A frequency
   String vfoBFreq = ''; // query VFO B frequency
   String vfoAResponse = ''; // expected response for VFO query where curr vfo is A
-  String vfoBResponse =
-      ''; // expected response for VFO B query where curr vfo is B
+  String vfoBResponse = ''; // expected response for VFO B query where curr vfo is B
   String vfoAFreqResponse = ''; // expected respoinse for VFO A frequency query
   String vfoBFreqResponse = ''; // expected respoinse for VFO B frequency query
-  String modeResponsePrefix =
-      ''; // expected prefix of mode query reply // MDO for test only
-  Map<String, String> modeList =
-      <String, String>{}; // list of modes defined for this radio
+  String modeResponsePrefix = ''; // expected prefix of mode query reply // MDO for test only
+  Map<String, String> modeList = <String, String>{}; // list of modes defined for this radio
   final String crlf = '\r\n';
   int freqLength = 10; // most common value
   int radioTcpPortNumber = 23;
@@ -55,9 +51,7 @@ class ARCON {
   List<int> inbytes = <int>[];
   List<String> cmdLines = <String>[];
   List<String> setupLines = <String>[];
-  final String clientHelpText =
-    'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
-
+  final String clientHelpText = 'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
   
   ARCON(
     String radioFilename, {
@@ -525,7 +519,8 @@ class ARCON {
     if (isTcp) {
       print('get tcp radio...');
       await getTcpRadio(radioAddress, radioTcpPortNumber);
-    } else {
+    } 
+    else {
       print('get serial radio...');
       await getSerialRadio(radioAddress, serialBaudRate);
     }
@@ -541,7 +536,22 @@ class ARCON {
       spc.bits = 8;
       spc.parity = 0;
       spc.stopBits = 1;
-      spc.setFlowControl(SerialPortFlowControl.none);
+      // spc.setFlowControl(SerialPortFlowControl.dtrDsr);
+      // spc.setFlowControl(SerialPortFlowControl.rtsCts);
+      // spc.setFlowControl(SerialPortFlowControl.xonXoff);
+      // spc.setFlowControl(SerialPortFlowControl.none);
+      switch(serialFlowControl) {
+      case 'No Flow Control': spc.setFlowControl(SerialPortFlowControl.none);
+      break;
+      case 'RTS': spc.setFlowControl(SerialPortFlowControl.rtsCts);
+      break;
+      case 'DTR': spc.setFlowControl(SerialPortFlowControl.dtrDsr);
+      break;
+      case 'Software': spc.setFlowControl(SerialPortFlowControl.xonXoff);
+      break;
+      default: spc.setFlowControl(SerialPortFlowControl.none);
+      break;
+      }
       if (Platform.isLinux || Platform.isMacOS) {
         // print('Linux Port: $address');
         if (address.startsWith("/dev/")) {
@@ -598,11 +608,16 @@ class ARCON {
     return;
   }
 
-  ///
+  /// Connect to a TCP enabled radio device given the [address] and [port]
   Future<void> getTcpRadio(String address, int port) async {}
 
-  /// handle onSocketStateChanged in builder for TCP client socket
-  void onSocketConnected() {}
+  /// Handle onSocketStateChanged in builder for TCP client socket.
+  void onSocketConnected() {
+    if(bCmdDebug) {
+      print('onSocketConnected...');
+      client.add('onSocketConnected'.codeUnits);
+    }
+  }
 
   // When remote control data is complete over the radio connection, handle it.
   void onRadioDataIn(Uint8List data) {
@@ -706,6 +721,8 @@ class ARCON {
     }
   }
 
+  /// Send a single radio command to the radio device either via serial port
+  /// or TCP socket.  The [cmd] must be fully formed.
   void sendRadioCommand(Uint8List cmd) {
     if (cmd.isEmpty) {
       return;
@@ -727,7 +744,7 @@ class ARCON {
     }
   }
 
-  // Frequency command builder utiility functions for CI-V, CAT and old Yaesu BCD
+  // Frequency command builder utiility functions for CI-V
   String getCIVFreq(final String freqHz) {
     final int idx = freqPrefixA.length;
     final int endex = freqHz.indexOf(freqSuffix, idx);
@@ -771,6 +788,7 @@ class ARCON {
     return out;
   }
 
+  /// Build a frequency change command for CI-V
   String buildCIVFreq(final String freq, final int length, {int vfo = 0}) {
     String out;
     String outfreq = freq;
@@ -815,12 +833,14 @@ class ARCON {
     return out;
   }
 
+  // Frequency command builder utiility functions for CAT
   String getCATFreq(final String freqHz) {
     final int idx = freqPrefixA.length;
     final int endex = freqHz.indexOf(freqSuffix);
     return freqHz.substring(idx, endex + 1);
   }
 
+  /// Build a frequency change command for CAT
   String buildCATFreq(final String freq, {final int length = 8, int vfo = 0}) {
     String outfreq = freq;
     // ensure '0' front padding to [length] digits.
@@ -837,10 +857,12 @@ class ARCON {
     return outfreq;
   }
 
+  /// Frequency command builder utiility functions for old Yaesu BCD (FT-857D era)
   String getBCDFreq(final String freqHz) {
     return freqHz.substring(0, freqLength);
   }
 
+  /// Build a frequency change command for old Yaesu BCD
   String buildBCDFreq(
     final String freq, {
     final int length = 8,
