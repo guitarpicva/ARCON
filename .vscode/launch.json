@@ -5,13 +5,32 @@
     "version": "0.1.0",
     "configurations": [
         {
-            "name": "arcon",
+            "name": "arconkx3",
+            "type": "dart",
+            "request": "launch",
+            "program": "bin/main.dart",
+            "args": [
+                "RadioFiles/KX-3.json"
+            ]
+        },
+        {
+            "name": "arcon450",
             "request": "launch",
             "type": "dart",
             "program": "./bin/main.dart",
             "args": [
-                "RadioFiles/FT450D.json"
+                "RadioFiles/FT-450D.json"
+            ]
+        },
+        {
+            "name": "arcon705",
+            "request": "launch",
+            "type": "dart",
+            "program": "./bin/main.dart",
+            "args": [
+                "RadioFiles/IC-705.json"
             ]
         }
+
     ]
 }

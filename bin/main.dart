@@ -12,9 +12,11 @@ ArgParser buildParser() {
       'help',
       abbr: 'h',
       negatable: false,
-      help: 'Print this usage information.',
+      help: 'Usage: arcon [flags] RSON FILE Path where RSON file-path must be the last parameter.\n\n'
     )
-    ..addFlag('version', negatable: false, help: 'Print the tool version.');
+    ..addFlag('version', negatable: false, help: 'Print the tool version.')
+    ..addFlag('address', abbr: 'a', negatable: false, help: 'Serial port namd or IPv4 Address')
+    ..addFlag('port-or-baud', abbr: 'p', negatable: false, help: 'Print the tool version.');
 }
 
 void printUsage(ArgParser argParser) {

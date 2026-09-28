@@ -5,7 +5,9 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:libserialport/libserialport.dart';
 
-String freqPrefixA = '';
+
+class ARCON {
+  String freqPrefixA = '';
 String freqPrefixB = '';
 String freqSuffix = '';
 String freqType = '';
@@ -57,7 +59,6 @@ List<String> setupLines = <String>[];
 final String clientHelpText =
     'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
 
-class ARCON {
   /// The constructor which requires
   ARCON(
     String radioFilename, {
@@ -148,18 +149,18 @@ class ARCON {
         if (parts.length < 2) {
           return;
         }
-        final String freq = parts[1];
+        final String freq = parts[1].trim();
         if (freq.isEmpty) {
           return;
         }
-        sendSetVFOFreq(freq);
+        sendSetVFOFreq(freq, vfo: 0);
       } else if (cmd.startsWith("vfobfreq")) {
         List<String> parts = cmd.split(' ');
         print('parts: $parts');
         if (parts.length < 2) {
           return;
         }
-        final String freq = parts[1];
+        final String freq = parts[1].trim();
         if (freq.isEmpty) {
           return;
         }
@@ -169,7 +170,7 @@ class ARCON {
         if (parts.length < 2) {
           return;
         }
-        final String mode = parts[1];
+        final String mode = parts[1].trim();
         if (mode.isNotEmpty) {
           print('sendSetMode: $mode');
           sendSetMode(mode);
@@ -429,23 +430,23 @@ class ARCON {
     String freqcmd = '';
     String freqDigits = '';
     if (freqType == "CAT") {
+      freqcmd = buildCATFreq(freqHz, length: freqLength, vfo: vfo);
+      print('sendSetVFOFreq: cat: $freqcmd');
+    } 
+    else if (freqType == "CI-V") {
       freqcmd = vfo == 0 ? freqPrefixA : freqPrefixB;
-      freqDigits = buildCATFreq(freqHz, length: freqLength, vfo: vfo);
-      freqcmd = '$freqcmd$freqDigits$freqSuffix';
-    } else if (freqType == "CI-V") {
-      freqcmd = vfo == 0 ? freqPrefixA : freqPrefixB;
-      freqDigits = buildCIVFreq(freqHz, freqLength, vfo: vfo);
-      freqcmd = '$freqcmd$freqDigits$freqSuffix';
+      freqcmd = buildCIVFreq(freqHz, freqLength, vfo: vfo);
+      // freqcmd = '$freqcmd$freqDigits$freqSuffix';
     } else if (freqType == "BCD") {
-      freqcmd = vfo == 0 ? freqPrefixA : freqPrefixB;
-      freqDigits = buildBCDFreq(freqHz, length: freqLength, suffix: '01');
-      freqcmd = '$freqcmd$freqDigits$freqSuffix';
+      // freqcmd = vfo == 0 ? freqPrefixA : freqPrefixB;
+      freqcmd = buildBCDFreq(freqHz, length: freqLength, suffix: '01');
+      //freqcmd = '$freqcmd$freqDigits$freqSuffix';
     }
 
     if (freqcmd.isNotEmpty) {
       // covers a rogue freqType value
       for (String line in freqcmd.split(',')) {
-        cmdLines.add('$line$freqSuffix');
+        cmdLines.add(line);
       }
     }
     sendCommands();
@@ -662,7 +663,7 @@ class ARCON {
       return;
     }
     if (isTcp && socket != null) {
-      print('sendRadioCommand: $cmd');
+      print('send TCP command: $cmd');
       socket.add(cmd.toList());
       socket.flush();
     } 
@@ -784,6 +785,7 @@ class ARCON {
     } else {
       outfreq = '$freqPrefixB$outfreq$freqSuffix';
     }
+    print('buildCATFreq: $outfreq');
     return outfreq;
   }
 
