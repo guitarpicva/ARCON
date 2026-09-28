@@ -14,7 +14,9 @@ ArgParser buildParser() {
       negatable: false,
       help: 'Print this usage information.',
     )
-    ..addFlag('version', negatable: false, help: 'Print the tool version.');
+    ..addFlag('version', negatable: false, help: 'Print the tool version.')
+    ..addOption('address', abbr: 'a', help: 'The radio TCP address or serial port name.')
+    ..addOption('port_or_baud', abbr: 'p', help: 'The radio TCP port or Serial baud rate.');
 }
 
 void printUsage(ArgParser argParser) {
@@ -23,6 +25,8 @@ void printUsage(ArgParser argParser) {
 }
 
 void main(List<String> arguments) {
+  String address = '';
+  String port = '';
   final ArgParser argParser = buildParser();
   try {
     final ArgResults results = argParser.parse(arguments);
@@ -36,6 +40,10 @@ void main(List<String> arguments) {
       print('arcon version: $version');
       return;
     }
+    address = results.option('address')??'';
+    port = results.option('port_or_baud')??'';
+    print('option address: $address');
+    print('option port_or_baud: $port');
     // Act on the arguments provided.
     print('Positional arguments: ${results.rest}');
   } on FormatException catch (e) {
@@ -51,6 +59,7 @@ void main(List<String> arguments) {
   // ARCON(arguments.last);
   // TEST
   print('CWD: ${Directory.current}');
-  ARCON(arguments.last);
+
+  ARCON(arguments.last, address:address, port:port);
   // END TEST
 }

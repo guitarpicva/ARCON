@@ -53,11 +53,8 @@ class ARCON {
   List<String> setupLines = <String>[];
   final String clientHelpText = 'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
   
-  ARCON(
-    String radioFilename, {
-    bool startServer = true,
-    int serverPortNumber = 19791,
-  }) {
+  ARCON(String radioFilename, {bool startServer = true, int serverPortNumber = 19791, String address = '', String port = ''}) 
+  {
     print('RadioFile: $radioFilename');
     radioFile = radioFilename;
     bStartServer = startServer;
@@ -65,6 +62,19 @@ class ARCON {
 
     // load the model for the radio to connect to
     loadRadioFile();
+
+    if(address.isNotEmpty) {
+      radioAddress = address;
+    }
+    if(port.isNotEmpty) {
+      if(isTcp) {
+        radioTcpPortNumber = int.parse(port);
+      }
+      else {
+        serialBaudRate = int.parse(port);
+      }
+    }
+    print('address: $radioAddress -- port: $radioTcpPortNumber/$serialBaudRate');
     // timers for ports were here in C++
     // start the connection to the radio
     startControlConnection();
