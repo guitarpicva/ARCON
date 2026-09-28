@@ -417,11 +417,12 @@ final String clientHelpText =
 
   void sendSetMode(final String modeName) {
     // gather the mode command by name from the [modeList]
-    var modecmd = modeList['modeName'];
+    var modecmd = modeList[modeName];
     if (modecmd != null && modecmd.isNotEmpty) {
       for (String line in modecmd.split(',')) {
         cmdLines.add('$line$freqSuffix');
       }
+      print('sendSetMode cmds: $cmdLines');
       sendCommands();
     }
   }
