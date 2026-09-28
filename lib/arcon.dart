@@ -5,61 +5,60 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:libserialport/libserialport.dart';
 
-
 class ARCON {
   String freqPrefixA = '';
-String freqPrefixB = '';
-String freqSuffix = '';
-String freqType = '';
-String radioAddress = '';
-String radioFile = '';
-String radioName = '???';
-String serialFlowControl = 'No Flow Control';
-String serialParams = '8N1';
-String pttOn = '';
-String pttOff = '';
-String pttData = '';
-String splitOn = '';
-String splitOff = '';
-String splitToggle = '';
-String toVFOA = '';
-String toVFOB = '';
-String autoTune = '';
-String modeQuery =
-    ''; // which mode is in use -- compare reply to modeList values
-String vfoQuery = ''; // which vfo is in use
-String vfoAFreq = ''; // query VFO A frequency
-String vfoBFreq = ''; // query VFO B frequency
-String vfoAResponse = ''; // expected response for VFO query where curr vfo is A
-String vfoBResponse =
-    ''; // expected response for VFO B query where curr vfo is B
-String vfoAFreqResponse = ''; // expected respoinse for VFO A frequency query
-String vfoBFreqResponse = ''; // expected respoinse for VFO B frequency query
-String modeResponsePrefix =
-    ''; // expected prefix of mode query reply // MDO for test only
-Map<String, String> modeList =
-    <String, String>{}; // list of modes defined for this radio
-final String crlf = '\r\n';
-int freqLength = 10; // most common value
-int radioTcpPortNumber = 23;
-int serverListenPortNumber = 19791;
-int serialBaudRate = 19200;
-int txTail = 20;
-bool isTcp = false;
-bool bStartServer = true; // hard coded on for now
-bool bCmdDebug = false; // user can turn it on via the TCP client
-late SerialPort serial; // Serial connection to radio
-late Socket socket; // TCP connection to radio
-late ServerSocket server;
-late Socket client;
-List<int> clientBytes = <int>[];
-List<int> inbytes = <int>[];
-List<String> cmdLines = <String>[];
-List<String> setupLines = <String>[];
-final String clientHelpText =
+  String freqPrefixB = '';
+  String freqSuffix = '';
+  String freqType = '';
+  String radioAddress = '';
+  String radioFile = '';
+  String radioName = '???';
+  String serialFlowControl = 'No Flow Control';
+  String serialParams = '8N1';
+  String pttOn = '';
+  String pttOff = '';
+  String pttData = '';
+  String splitOn = '';
+  String splitOff = '';
+  String splitToggle = '';
+  String toVFOA = '';
+  String toVFOB = '';
+  String autoTune = '';
+  String modeQuery =
+      ''; // which mode is in use -- compare reply to modeList values
+  String vfoQuery = ''; // which vfo is in use
+  String vfoAFreq = ''; // query VFO A frequency
+  String vfoBFreq = ''; // query VFO B frequency
+  String vfoAResponse = ''; // expected response for VFO query where curr vfo is A
+  String vfoBResponse =
+      ''; // expected response for VFO B query where curr vfo is B
+  String vfoAFreqResponse = ''; // expected respoinse for VFO A frequency query
+  String vfoBFreqResponse = ''; // expected respoinse for VFO B frequency query
+  String modeResponsePrefix =
+      ''; // expected prefix of mode query reply // MDO for test only
+  Map<String, String> modeList =
+      <String, String>{}; // list of modes defined for this radio
+  final String crlf = '\r\n';
+  int freqLength = 10; // most common value
+  int radioTcpPortNumber = 23;
+  int serverListenPortNumber = 19791;
+  int serialBaudRate = 19200;
+  int txTail = 20;
+  bool isTcp = false;
+  bool bStartServer = true; // hard coded on for now
+  bool bCmdDebug = false; // user can turn it on via the TCP client
+  late SerialPort serial; // Serial connection to radio
+  late Socket socket; // TCP connection to radio
+  late ServerSocket server;
+  late Socket client;
+  List<int> clientBytes = <int>[];
+  List<int> inbytes = <int>[];
+  List<String> cmdLines = <String>[];
+  List<String> setupLines = <String>[];
+  final String clientHelpText =
     'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
 
-  /// The constructor which requires
+  
   ARCON(
     String radioFilename, {
     bool startServer = true,
@@ -82,6 +81,9 @@ final String clientHelpText =
     }
   }
 
+  /// Start the TCP socket server awaiting a connection from a TCP client
+  /// socket which processes action commands and query commands from the user
+  /// space.
   Future<ServerSocket> startARCONServer() async {
     // only one active connection to the radio (for now)
     var ss = await ServerSocket.bind(
@@ -100,6 +102,8 @@ final String clientHelpText =
     return server;
   }
 
+  /// A TCP connection has arrived at the TCP server so make it the active
+  /// connection for commands and queries.
   void newConnection(Socket clientSocket) {
     client = clientSocket;
     client.setOption(SocketOption.tcpNoDelay, true);
@@ -119,7 +123,9 @@ final String clientHelpText =
     );
   }
 
-  /// Process data arriving on the TCP control socket connection.
+  /// Process data arriving on the TCP control socket connection.  Incoming
+  /// data is passed to [handleClientCommands] which in turn may pass query
+  /// commands to [queryCmd].
   void processClientData(Uint8List data) {
     // this is an ASCII command port only, so split the commands
     // on line end and pass to handler function [handleClientcommands].
@@ -130,6 +136,8 @@ final String clientHelpText =
     handleClientCommands(cmds);
   }
 
+  /// When the user sends an action command, perform the appropriate things
+  /// at the radio device to satisfy that action.
   void handleClientCommands(final List<String> cmds) {
     for (String cmd in cmds) {
       print('handleClientCommands: $cmd');
@@ -214,6 +222,9 @@ final String clientHelpText =
     }
   }
 
+  /// When the user sends a query command on the TCP server socket, then this
+  /// function decides what to do with the command and may or may not direct
+  /// the radio device in some way.
   void queryCmd(final String cmd) {
     String out;
     // decide which query cmd to use based on the API command passed
@@ -238,6 +249,9 @@ final String clientHelpText =
     sendCommands();
   }
 
+  /// A [List<String>] of commands, [cmdList] is cycled through with an 
+  /// interstitial wait time to allow the radio to send more than one command
+  /// in a row effectively.
   void sendCommands() {
     // send first command from cmdLines and remove first
     Timer.periodic(Duration(milliseconds: 50), (t) {
@@ -262,8 +276,26 @@ final String clientHelpText =
     });
   }
 
-  void startOver(final String radioFilename) {}
+  /// Given a possibly new RSON filename, restart the system.
+  void startOver(final String radioFilename) {
+    // load the model for the radio to connect to
+    loadRadioFile();
+    // timers for ports were here in C++
+    // start the connection to the radio
+    startControlConnection();
+    // if we wish to start the control TCP
+    // server do so now.
+    if (bStartServer) {
+      startARCONServer();
+    }
+  }
 
+  /// Load the configured RSON radio file.  This does NOT reconfigure the
+  /// ARCON system.  This function is called at startup and also by the
+  /// handleUserData() function when "restart" command has been sent.
+  /// If the user loads a new radio file and then calls "restart", THEN
+  /// the ARCON system should be built back up in the new configuration.  All
+  /// connections to radio devices are torn down and re-made.
   void loadRadioFile() {
     // using radioFile path, set up all instance variables
     var f = File(radioFile);
@@ -360,6 +392,8 @@ final String clientHelpText =
     }
   }
 
+  /// Send the configured set of commands for when first connecting to the
+  /// radio device in order to get it into a proper configuration for use.
   void sendSetupLines() {
     //print('Send setup lines $setupLines');
     for (String line in setupLines) {
@@ -371,6 +405,7 @@ final String clientHelpText =
     // until done, then cancels the timer.
   }
 
+  /// Send the configured PTT ON command
   void sendPttOn() {
     for (String line in pttOn.split(',')) {
       cmdLines.add('$line$freqSuffix');
@@ -380,6 +415,7 @@ final String clientHelpText =
     sendCommands();
   }
 
+  /// Send the configured PTT OFF command
   void sendPttOff() {
     for (String line in pttOff.split(',')) {
       cmdLines.add('$line$freqSuffix');
@@ -387,6 +423,7 @@ final String clientHelpText =
     sendCommands();
   }
 
+  /// Send the configured Data mode PTT command (if possible)
   void sendPttData() {
     for (String line in pttData.split(',')) {
       cmdLines.add('$line$freqSuffix');
@@ -394,6 +431,7 @@ final String clientHelpText =
     sendCommands();
   }
 
+  /// Send the configured split VFO ON command
   void sendSplitOn() {
     for (String line in splitOn.split(',')) {
       cmdLines.add('$line$freqSuffix');
@@ -401,6 +439,7 @@ final String clientHelpText =
     sendCommands();
   }
 
+  /// Send the configured split VFO OFF command
   void sendSplitOff() {
     for (String line in splitOff.split(',')) {
       cmdLines.add('$line$freqSuffix');
@@ -408,6 +447,7 @@ final String clientHelpText =
     sendCommands();
   }
 
+  /// Send the configured command to toggle the VFO split state (if possible)
   void sendSplitToggle() {
     for (String line in splitToggle.split(',')) {
       cmdLines.add('$line$freqSuffix');
@@ -415,18 +455,21 @@ final String clientHelpText =
     sendCommands();
   }
 
+  /// Send the command from the [modeList] Map to change the mode. 
   void sendSetMode(final String modeName) {
-    // gather the mode command by name from the [modeList]
+    // gather the mode command by name from the [modeList] Map
     var modecmd = modeList[modeName];
     if (modecmd != null && modecmd.isNotEmpty) {
       for (String line in modecmd.split(',')) {
         cmdLines.add('$line$freqSuffix');
       }
-      print('sendSetMode cmds: $cmdLines');
+      //print('sendSetMode cmds: $cmdLines');
       sendCommands();
     }
   }
 
+  /// Send the derived command to go to a frequency on 
+  /// a specific VFO
   void sendSetVFOFreq(String freqHz, {int vfo = 0}) {
     String freqcmd = '';
     String freqDigits = '';
@@ -453,13 +496,15 @@ final String clientHelpText =
     sendCommands();
   }
 
+  /// Send the command to move to VFO A
   void sendToVFOA() {
     for (String line in toVFOA.split(',')) {
       cmdLines.add('$line$freqSuffix');
     }
     sendCommands();
   }
-
+  
+  /// Send the command to move to VFO B
   void sendToVFOB() {
     for (String line in toVFOB.split(',')) {
       cmdLines.add('$line$freqSuffix');
@@ -467,6 +512,7 @@ final String clientHelpText =
     sendCommands();
   }
 
+  /// Send the configured autotune command
   void sendAutoTune() {
     for (String line in autoTune.split(',')) {
       cmdLines.add('$line$freqSuffix');
@@ -474,6 +520,7 @@ final String clientHelpText =
     sendCommands();
   }
 
+  /// Start the serial or TCP connection to the radio device.
   Future<void> startControlConnection() async {
     if (isTcp) {
       print('get tcp radio...');
@@ -808,15 +855,16 @@ final String clientHelpText =
     while (out.length < length) {
       out = '0$out;';
     }
-    return out + suffix;
+    return '$out$suffix';
   }
 
   /// Serial port name or IP address if TCP
-  void setRadioAddress(final String portname) {
-    radioAddress = portname;
+  void setRadioAddress(final String address) {
+    //  Address may be a serial port name or a TCP server ipv4 address
+    radioAddress = address;
   }
 
-  /// Filename of the RSON (JSON) file to configure the radio.
+  /// File-path of the RSON (JSON) file to configure the radio.
   void setRadioFile(final String radiofile) {
     radioFile = radiofile;
   }
@@ -826,7 +874,8 @@ final String clientHelpText =
     radioTcpPortNumber = port;
   }
 
-  /// Whether or not the radio connection is a TCP socket.
+  /// Whether or not the radio connection is a TCP socket (true) or a serial
+  /// port (false).
   void setIsTcp(bool istcp) {
     isTcp = istcp;
   }
