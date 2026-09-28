@@ -1,5 +1,5 @@
 {
-    "autoTune": "",
+    "autoTune": "FEFEA4E01C0102",
     "commandTimeout": 20,
     "connectionMethod": "SERIAL",
     "controlType": "BINARY",
