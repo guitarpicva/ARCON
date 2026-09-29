@@ -151,11 +151,14 @@ class ARCON {
       }
       if (cmd.startsWith("ptton")) {
         sendPttOn();
-      } else if (cmd.startsWith("pttdata")) {
+      } 
+      else if (cmd.startsWith("pttdata")) {
         sendPttData();
-      } else if (cmd.startsWith("pttoff")) {
+      } 
+      else if (cmd.startsWith("pttoff")) {
         sendPttOff();
-      } else if (cmd.startsWith("vfoafreq")) {
+      } 
+      else if (cmd.startsWith("vfoafreq")) {
         List<String> parts = cmd.split(' ');
         print('Parts:$parts');
         if (parts.length < 2) {
@@ -166,7 +169,8 @@ class ARCON {
           return;
         }
         sendSetVFOFreq(freq, vfo: 0);
-      } else if (cmd.startsWith("vfobfreq")) {
+      } 
+      else if (cmd.startsWith("vfobfreq")) {
         List<String> parts = cmd.split(' ');
         print('parts: $parts');
         if (parts.length < 2) {
@@ -177,7 +181,8 @@ class ARCON {
           return;
         }
         sendSetVFOFreq(freq, vfo: 1);
-      } else if (cmd.startsWith("mode")) {
+      } 
+      else if (cmd.startsWith("mode")) {
         List<String> parts = cmd.split(' ');
         if (parts.length < 2) {
           return;
@@ -189,39 +194,57 @@ class ARCON {
         } else {
           print('mode is empty...:(');
         }
-      } else if (cmd.startsWith("tovfoa")) {
+      } 
+      else if (cmd.startsWith("tovfoa")) {
         sendToVFOA();
-      } else if (cmd.startsWith("tovfob")) {
+      } 
+      else if (cmd.startsWith("tovfob")) {
         print('trapped client cmd: tovfob');
         sendToVFOB();
-      } else if (cmd.startsWith("autotune")) {
+      } 
+      else if (cmd.startsWith("autotune")) {
         sendAutoTune();
-      } else if (cmd.startsWith("setuplines")) {
+      } 
+      else if (cmd.startsWith("setuplines")) {
         sendSetupLines();
-      } else if (cmd.startsWith("spliton")) {
+      } 
+      else if (cmd.startsWith("spliton")) {
         sendSplitOn();
-      } else if (cmd.startsWith("splitoff")) {
+      } 
+      else if (cmd.startsWith("splitoff")) {
         sendSplitOff();
-      } else if (cmd.startsWith("splittoggle")) {
+      } 
+      else if (cmd.startsWith("splittoggle")) {
         sendSplitToggle();
       }
       // else if(cmd.startsWith("txslines") {sendTxsLines();}
       // else if(cmd.startsWith("rxslines") {sendRxsLines();}
       else if (cmd.startsWith("help")) {
         client.add(clientHelpText.codeUnits);
-      } else if (cmd.startsWith("restart")) {
+      } 
+      else if (cmd.startsWith("restart")) {
         startOver(radioFile);
         var msg = 'restarting ${radioFile.split("/").last}$crlf';
         client.add(msg.codeUnits);
         print('restart with current radio file ${radioFile.split("/").last}');
         return; // just in case things are added after this
-      } else if (cmd.startsWith("debug")) {
+      } 
+      else if (cmd.startsWith("debug")) {
         List<String> parts = cmd.toLowerCase().split(' ');
+        print('debug parts: $parts');
         if (parts.length > 1) {
-          bCmdDebug = parts[1] == "on";
+          // print('parts.length: ${parts.length}');
+          // print('parts[1]: ${parts[1]} -- ${parts[1].trim() == 'on'}');
+          bCmdDebug = (parts[1].trim() == 'on');
           var msg = 'cmd debug: ${parts[1]}$crlf';
           client.add(msg.codeUnits);
         }
+        // print('debug: $bCmdDebug');
+      }
+      else if(bCmdDebug) {
+        print('debug on: send command: $cmd');
+          cmdLines.add(cmd);
+          sendCommands();
       }
     }
   }
@@ -268,7 +291,8 @@ class ARCON {
         var cmd = Uint8List.fromList(cmdLines[0].codeUnits);
         // print('send cat command -- $cmd');
         sendRadioCommand(cmd);
-      } else {
+      } 
+      else {        
         var fromhex = hex.decode(cmdLines[0]);
         var cmd = Uint8List.fromList(fromhex);
         sendRadioCommand(cmd);
@@ -476,7 +500,7 @@ class ARCON {
   /// a specific VFO
   void sendSetVFOFreq(String freqHz, {int vfo = 0}) {
     String freqcmd = '';
-    String freqDigits = '';
+    // String freqDigits = '';
     if (freqType == "CAT") {
       freqcmd = buildCATFreq(freqHz, length: freqLength, vfo: vfo);
       print('sendSetVFOFreq: cat: $freqcmd');
@@ -899,6 +923,9 @@ class ARCON {
   /// File-path of the RSON (JSON) file to configure the radio.
   void setRadioFile(final String radiofile) {
     radioFile = radiofile;
+    // TODO decide if this is necessary or let the user then call the
+    // startOver() function directly.
+    // startOver(radioFile); 
   }
 
   /// TCP port number of the radio connection if required.
