@@ -80,7 +80,7 @@ class ARCON {
     startControlConnection();
     // if we wish to start the control TCP
     // server do so now.
-    if (bStartServer) {
+    if (bStartServer) {      
       startARCONServer();
     }
   }
@@ -101,6 +101,7 @@ class ARCON {
       print(
         'Server Socket started on address:port ${client.address}${client.port}',
       );
+      
     });
 
     return server;
@@ -222,6 +223,13 @@ class ARCON {
       else if (cmd.startsWith("help")) {
         client.add(clientHelpText.codeUnits);
       } 
+      else if (cmd.startsWith("radiofile")) {
+        List<String> parts = cmd.trim().split(' ');
+        if(parts.length > 1) {
+          // load the new path to the new RSON file
+          radioFile = parts[1].trim();
+        }
+      }
       else if (cmd.startsWith("restart")) {
         startOver(radioFile);
         var msg = 'restarting ${radioFile.split("/").last}$crlf';
@@ -305,17 +313,12 @@ class ARCON {
   }
 
   /// Given a possibly new RSON filename, restart the system.
-  void startOver(final String radioFilename) {
+  Future<void> startOver(final String radioFilename) async {
     // load the model for the radio to connect to
-    loadRadioFile();
+    loadRadioFile();    
     // timers for ports were here in C++
     // start the connection to the radio
     startControlConnection();
-    // if we wish to start the control TCP
-    // server do so now.
-    if (bStartServer) {
-      startARCONServer();
-    }
   }
 
   /// Load the configured RSON radio file.  This does NOT reconfigure the
