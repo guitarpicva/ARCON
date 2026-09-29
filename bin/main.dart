@@ -59,7 +59,7 @@ void main(List<String> arguments) {
   // ARCON(arguments.last);
   // TEST
   print('CWD: ${Directory.current}');
-
+  print('Starting ARCON: $arguments');
   ARCON(arguments.last, address:address, port:port);
   // END TEST
 }

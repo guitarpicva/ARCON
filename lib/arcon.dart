@@ -316,8 +316,7 @@ class ARCON {
   Future<void> startOver(final String radioFilename) async {
     // load the model for the radio to connect to
     loadRadioFile();    
-    // timers for ports were here in C++
-    // start the connection to the radio
+    // restart the connection to the configured radio device  
     startControlConnection();
   }
 
@@ -595,6 +594,7 @@ class ARCON {
           address = address.substring(5);
         }
         serial = SerialPort('/dev/$address'); // i.e. ttyACM0
+
         open = serial.openReadWrite();
         serial.config = spc;
         // spc.dtr = 1; // Windows is weird
