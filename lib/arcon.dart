@@ -188,7 +188,7 @@ class ARCON {
         if (parts.length < 2) {
           return;
         }
-        final String mode = parts[1].trim();
+        final String mode = parts[1].trim().toUpperCase();
         if (mode.isNotEmpty) {
           print('sendSetMode: $mode');
           sendSetMode(mode);
@@ -218,8 +218,6 @@ class ARCON {
       else if (cmd.startsWith("splittoggle")) {
         sendSplitToggle();
       }
-      // else if(cmd.startsWith("txslines") {sendTxsLines();}
-      // else if(cmd.startsWith("rxslines") {sendRxsLines();}
       else if (cmd.startsWith("help")) {
         client.add(clientHelpText.codeUnits);
       } 
@@ -228,13 +226,16 @@ class ARCON {
         if(parts.length > 1) {
           // load the new path to the new RSON file
           radioFile = parts[1].trim();
+          var msg = 'Loading radiofile $radioFile...$crlf';
+          client.add(msg.codeUnits);  
         }
+        loadRadioFile();
       }
       else if (cmd.startsWith("restart")) {
         startOver(radioFile);
-        var msg = 'restarting ${radioFile.split("/").last}$crlf';
+        var msg = 'restarting $radioFile$crlf';
         client.add(msg.codeUnits);
-        print('restart with current radio file ${radioFile.split("/").last}');
+        //print('restart with current radio file ${radioFile.split("/").last}');
         return; // just in case things are added after this
       } 
       else if (cmd.startsWith("debug")) {
@@ -314,6 +315,7 @@ class ARCON {
 
   /// Given a possibly new RSON filename, restart the system.
   Future<void> startOver(final String radioFilename) async {
+    await serial.close();
     // load the model for the radio to connect to
     loadRadioFile();    
     // restart the connection to the configured radio device  
@@ -343,6 +345,7 @@ class ARCON {
       serialFlowControl = jsonMap['serialFlowControl'].toString();
       radioTcpPortNumber = int.parse(jsonMap['radioTcpPortNumber'].toString());
       List<String> sltmp = jsonMap['initialSetup'].toString().split(",");
+      setupLines.clear();
       for (String s in sltmp) {
         if (s.trim().isNotEmpty) {
           setupLines.add(s);
@@ -363,6 +366,7 @@ class ARCON {
       // modes list Map<String, String>
       var modetmp = jsonEncode(jsonMap['modeList']);
       // print('modetmp: $modetmp');
+      modeList.clear();
       if (modetmp != null) {
         var jsonModes = jsonDecode(modetmp);
         // print('jsonModes: $jsonModes -- ${jsonModes.keys}');
@@ -599,7 +603,8 @@ class ARCON {
         serial.config = spc;
         // spc.dtr = 1; // Windows is weird
         print('Port: $address speed: $speed');
-      } else {
+      } 
+      else {
         // essentially Windows is the only other viable candidate ATM
         print('Port: $address speed: $speed');
         serial = SerialPort(address); // i.e. COM23
