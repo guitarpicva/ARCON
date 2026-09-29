@@ -43,7 +43,8 @@ class ARCON {
   bool isTcp = false;
   bool bStartServer = true; // hard coded on for now
   bool bCmdDebug = false; // user can turn it on via the TCP client
-  late SerialPort serial; // Serial connection to radio
+  // late SerialPort serial; // Serial connection to radio
+  SerialPort serial = SerialPort(''); // no name (address or port) until setup time
   late Socket socket; // TCP connection to radio
   late ServerSocket server;
   late Socket client;
@@ -98,10 +99,7 @@ class ARCON {
     server = ss;
     server.listen((client) {
       newConnection(client);
-      print(
-        'Server Socket started on address:port ${client.address}${client.port}',
-      );
-      
+      client.write('Welcome to ARCON on ${client.remoteAddress}:${client.port}$crlf');
     });
 
     return server;
@@ -316,6 +314,8 @@ class ARCON {
   /// Given a possibly new RSON filename, restart the system.
   Future<void> startOver(final String radioFilename) async {
     await serial.close();
+    // TODO how to do this if not used socket != null is an error
+    //await socket.destroy;
     // load the model for the radio to connect to
     loadRadioFile();    
     // restart the connection to the configured radio device  
