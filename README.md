@@ -6,8 +6,25 @@ See also [RSON](https://github.com/guitarpicva/RSON.git) and [RadioFiles](https:
 
 Starting the program from the command line currently requires the LAST parameter be the path to the RSON radio json file to load.  For the reference implementation, ensure that the RSON file is correct for mainly the serial port data.  Further work on extending the command line parameters to include serial port/ip address and baud rate/port number will be in the next iteration.
 
-Dart language dependency is min version of 3.12.2 for the Dart SDK.
+## Building ARCON
+Dart language dependency for building ARCON is *min version of 3.12.2* for the Dart SDK.
+
+ARCON is written in the Dart programming language.  If the Dart SDK is installed on the target system, a command line build is quite simple from the base arcon source code directory.
 
 Dependency for serial port access is libserialport.  The serialport.dll file is provided for Win64 in the Win x64 reference implementation installer as well as in the repository.  This file is required for the Win64 version to function properly.
 
 For Linux the system package is usually named libserialport-dev, which is used to BUILD the static executable using the `dart build ...` utility.  Typically, the libserialport library need not be installed on the target system (but likely would be anyway).
+
+
+## Steps after cloning the repository
+1. `dart pub get`
+Step 1. ensures all dependencies are met for the build as contained in the pubspec.yaml file.
+
+2. `dart build cli bin/arcon.dart`
+Step 2. creates a ./build folder structure and makes the project.
+
+3. Find the static executable
+After the dart build step, Dart will print the path to the created executable named `arcon` or `arcon.exe` based on platform.
+
+4. As an example: `./arcon RadioFiles/FT-450D.json`
+Run the arcon program with a single required parameter of the chosen RSON file for the radio to be controlled. 
