@@ -33,4 +33,4 @@ After the dart build step, Dart will print the path to the created executable na
 
 4. As an example: `./arcon RadioFiles/FT-450D.json`
 
-Run the arcon program with a single required parameter of the chosen RSON file for the radio to be controlled. 
+Run the arcon program with a single required parameter of the chosen RSON file for the radio to be controlled.  Use the `-h` or `--help` switch to see the other command line paramaters available, such as the radio address value or the radio connection port number or serial baud rate value.  Other parameters may be added in the future.
