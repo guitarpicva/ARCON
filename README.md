@@ -17,6 +17,8 @@ For Linux the system package is usually named libserialport-dev, which is used t
 
 
 ## Steps after cloning the repository
+
+From the arcon source code base directory:
 1. `dart pub get`
 Step 1. ensures all dependencies are met for the build as contained in the pubspec.yaml file.
 
