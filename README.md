@@ -20,13 +20,17 @@ For Linux the system package is usually named libserialport-dev, which is used t
 
 From the arcon source code base directory:
 1. `dart pub get`
+
 Step 1. ensures all dependencies are met for the build as contained in the pubspec.yaml file.
 
 2. `dart build cli bin/arcon.dart`
+
 Step 2. creates a ./build folder structure and makes the project.
 
 3. Find the static executable
+
 After the dart build step, Dart will print the path to the created executable named `arcon` or `arcon.exe` based on platform.
 
 4. As an example: `./arcon RadioFiles/FT-450D.json`
+
 Run the arcon program with a single required parameter of the chosen RSON file for the radio to be controlled. 
