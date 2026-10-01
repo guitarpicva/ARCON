@@ -2,7 +2,7 @@
 
 Basic functionality is to accommodate use by existing software programs in a simple manner with few changes to the existing software system.
 
-The addition of other functionality will extend the usefulness of ARCON in a more industry standard method.
+The addition of other functionality will extend the usefulness of ARCON using a more industry standard method.
 
 ## Upcoming Features in Plan
 
@@ -12,7 +12,7 @@ This may require a fork due to various idiosyncracies of commercial radio firmwa
 
 * Control of Ancillary Devices
 
-Such as data modems or various linking systems (2G/3G/4G ALE, Pactor, etc.)
+Such as data modems or various linking systems (2G/3G/4G ALE, DStar data, Pactor, etc.)
 
 * Add MQTT Capabilities
 
