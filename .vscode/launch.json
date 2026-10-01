@@ -8,7 +8,7 @@
             "name": "arconkx3",
             "type": "dart",
             "request": "launch",
-            "program": "bin/main.dart",
+            "program": "bin/arcon.dart",
             "args": [
                 "RadioFiles/KX-3.json"
             ]
@@ -17,7 +17,7 @@
             "name": "arcon450",
             "request": "launch",
             "type": "dart",
-            "program": "./bin/main.dart",
+            "program": "./bin/arcon.dart",
             "args": [
                 "RadioFiles/FT-450D.json"
             ]
@@ -26,9 +26,18 @@
             "name": "arcon705",
             "request": "launch",
             "type": "dart",
-            "program": "./bin/main.dart",
+            "program": "./bin/arcon.dart",
             "args": [
                 "RadioFiles/IC-705.json"
+            ]
+        },
+        {
+            "name": "arconEnvoy",
+            "request": "launch",
+            "type": "dart",
+            "program": "./bin/arcon.dart",
+            "args": [
+                "RadioFiles/CODAN.json"
             ]
         }
 

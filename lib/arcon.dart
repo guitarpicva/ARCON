@@ -43,13 +43,14 @@ class ARCON {
   bool isTcp = false;
   bool bStartServer = true; // hard coded on for now
   bool bCmdDebug = false; // user can turn it on via the TCP client
+  bool bClientConnected = false; // when a TCP control client is connected, true
   // late SerialPort serial; // Serial connection to radio
   SerialPort serial = SerialPort(''); // no name (address or port) until setup time
-  late Socket socket; // TCP connection to radio
-  late ServerSocket server;
-  late Socket client;
+  late Socket socket; // possible TCP connection to radio
+  // late ServerSocket server; // now handled anonymously
+  late Socket client; // TCP connection to arcon server
   List<int> clientBytes = <int>[];
-  List<int> inbytes = <int>[];
+  // List<int> inbytes = <int>[]; // no longer used
   List<String> cmdLines = <String>[];
   List<String> setupLines = <String>[];
   final String clientHelpText = 'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
@@ -89,20 +90,17 @@ class ARCON {
   /// Start the TCP socket server awaiting a connection from a TCP client
   /// socket which processes action commands and query commands from the user
   /// space.
-  Future<ServerSocket> startARCONServer() async {
+  Future<void> startARCONServer() async {
     // only one active connection to the radio (for now)
-    var ss = await ServerSocket.bind(
+    var server = await ServerSocket.bind(
       InternetAddress.anyIPv4,
       19791,
       shared: false,
     );
-    server = ss;
     server.listen((client) {
       newConnection(client);
       client.write('Welcome to ARCON on ${client.remoteAddress}:${client.port}$crlf');
     });
-
-    return server;
   }
 
   /// A TCP connection has arrived at the TCP server so make it the active
@@ -111,7 +109,8 @@ class ARCON {
     client = clientSocket;
     client.setOption(SocketOption.tcpNoDelay, true);
     print('TCP client connected...');
-    client.listen(
+    bClientConnected = true;    
+    client.listen(    
       (Uint8List data) async {
         processClientData(data);
       },
@@ -122,6 +121,7 @@ class ARCON {
       onDone: () {
         print('TCP client finished...');
         client.close();
+        bClientConnected = false;
       },
     );
   }
@@ -250,7 +250,8 @@ class ARCON {
       }
       else if(bCmdDebug) {
         print('debug on: send command: $cmd');
-          cmdLines.add(cmd);
+        print('debug cmd: $cmd$freqSuffix');// until done, then cancels the timer.
+          cmdLines.add('$cmd$freqSuffix');
           sendCommands();
       }
     }
@@ -288,15 +289,15 @@ class ARCON {
   /// in a row effectively.
   void sendCommands() {
     // send first command from cmdLines and remove first
-    Timer.periodic(Duration(milliseconds: 50), (t) {
-      // print('cmd timer pop -- $cmdLines');
+    Timer.periodic(Duration(milliseconds: 75), (t) {
+      print('cmd timer pop -- $cmdLines');
       if (cmdLines.isEmpty) {
         t.cancel();
         return;
       }
       if (freqType == "CAT") {
         var cmd = Uint8List.fromList(cmdLines[0].codeUnits);
-        // print('send cat command -- $cmd');
+        print('sendCommands: cat command -- ${cmdLines[0]}');
         sendRadioCommand(cmd);
       } 
       else {        
@@ -430,13 +431,14 @@ class ARCON {
   /// radio device in order to get it into a proper configuration for use.
   void sendSetupLines() {
     //print('Send setup lines $setupLines');
-    for (String line in setupLines) {
-      print('$line$freqSuffix');
+    for (final String line in setupLines) {
+      // print('setupLine: $line');
+      // print('sendSetupLines: build: $line$freqSuffix');
       cmdLines.add('$line$freqSuffix');
     }
-    //  = setupLines;
-    sendCommands(); // manages a timer to space out the commands
-    // until done, then cancels the timer.
+    // [sendCommands] manages a timer to space out the commands until done, then cancels the
+    // timer.
+    sendCommands();     
   }
 
   /// Send the configured PTT ON command
@@ -507,7 +509,12 @@ class ARCON {
   void sendSetVFOFreq(String freqHz, {int vfo = 0}) {
     String freqcmd = '';
     // String freqDigits = '';
-    if (freqType == "CAT") {
+    if(radioName == 'CODAN') {
+      // ONE special case for CODAN's stupid freq setting command for FreeTx
+      freqcmd = '$freqPrefixA$freqHz $freqHz$freqSuffix';
+      print('send codan freq: $freqcmd');
+    }
+    else if (freqType == "CAT") {
       freqcmd = buildCATFreq(freqHz, length: freqLength, vfo: vfo);
       print('sendSetVFOFreq: cat: $freqcmd');
     } 
@@ -651,7 +658,23 @@ class ARCON {
   }
 
   /// Connect to a TCP enabled radio device given the [address] and [port]
-  Future<void> getTcpRadio(String address, int port) async {}
+  Future<void> getTcpRadio(String address, int port) async {
+    var s = await Socket.connect(address, port);
+    socket = s;
+    socket.listen(
+      (data) async {
+        onRadioDataIn(data);
+      },
+      cancelOnError: false,
+      onError: (error) {
+        print('Radio TCP client error: $error');
+      },
+      onDone: () {
+        print('Radio TCP client finished...');
+        client.close();
+      });
+    sendSetupLines();    
+  }
 
   /// Handle onSocketStateChanged in builder for TCP client socket.
   void onSocketConnected() {
@@ -663,36 +686,33 @@ class ARCON {
 
   // When remote control data is complete over the radio connection, handle it.
   void onRadioDataIn(Uint8List data) {
-    // print('onRadioDataIn: ${String.fromCharCodes(data)}');
-    String indata = freqType == "CAT"
-        ? String.fromCharCodes(data)
+    final String indata = (freqType == "CAT")
+        ? String.fromCharCodes(data.toList())
         : hex.encode(data).toUpperCase();
+    print('onRadioDataIn: indata: $indata');
     List<String> cmds = indata.split((freqType == "CI-V") ? "FD" : freqSuffix);
-    inbytes.clear();
     for (String cmd in cmds) {
-      print('onRadioDataIn: cmd: $cmd');
-      // Check the CI-V commands for ack/nack and add prefix back for matching
-      // add the FEFE back to CI-V commands so easier to search for
-      // from send cmd lists
+      //print('onRadioDataIn: cmd: $cmd');
+      // Check the CI-V commands for ack/nack to discard them
       if (freqType == "CI-V") {
-        if (cmd.endsWith("FB")) {
-          return;
-        } // ACK
-        else if (cmd.endsWith("FA")) {
+        if (cmd.endsWith('FB')) {
+          continue;  // ACK
+        }
+        else if (cmd.endsWith('FA')) {
           if (bCmdDebug) {
-            if (client != null) {
+            if (bClientConnected) {
               client.add('NACK: $cmd$crlf'.codeUnits);
             }
           }
-          return;
-        } // NACK
+          continue; // NACK
+        }
       }
       if (bCmdDebug) {
-        if (client != null) {
+        if (bClientConnected) {
           client.add('$cmd$crlf'.codeUnits);
         }
       }
-      if (client != null) {
+      if (bClientConnected) {
         if (vfoAResponse.isNotEmpty && cmd.startsWith(vfoAResponse)) {
           client.add('vfoa$crlf'.codeUnits);
         } 
@@ -769,9 +789,9 @@ class ARCON {
     if (cmd.isEmpty) {
       return;
     }
-    if (isTcp && socket != null) {
-      print('send TCP command: $cmd');
-      socket.add(cmd.toList());
+    if (isTcp) {
+      print('send TCP command: ${String.fromCharCodes(cmd)}');
+      socket.write(cmd);
       socket.flush();
     } 
     else {
