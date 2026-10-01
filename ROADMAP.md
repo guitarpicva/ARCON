@@ -19,6 +19,6 @@ This may require a fork due to various idiosyncracies of commercial radio firmwa
 
 Such as data modems or various linking systems (2G/3G/4G ALE, DStar data, Pactor, etc.)
 
-* Add MQTT Capabilities
+* MQTT Client Capabilities
 
 The addition of industry standard message passing using MQTT will facilitate the ability to have radio systems work in concert with one another as a "unit".  This work is largely done already elsewhere, so it may be realized rather quickly.
