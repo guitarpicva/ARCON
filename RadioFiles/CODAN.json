@@ -30,14 +30,14 @@
     "splitOff": "",
     "splitOn": "",
     "radioTcpPortNumber": 23,
-    "toVFOA": "connect tcvr rf 14150000 14150000",
-    "toVFOB": "connect tcvr rf 14150000 14150000",
+    "toVFOA": "scan off,connect tcvr rf 14150000 14150000",
+    "toVFOB": "scan off,connect tcvr rf 14150000 14150000",
     "txTail": 20,    
     "frequencyControl": {
         "order": "CAT",
         "numDigits": 8,
-        "prefixA": "connect tcvr rf ",
-        "prefixB": "connect tcvr rf ",
+        "prefixA": "connect tcvr rf",
+        "prefixB": "connect tcvr rf",
         "suffix": "\r"
     }
 }

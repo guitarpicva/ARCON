@@ -53,7 +53,7 @@ class ARCON {
   // List<int> inbytes = <int>[]; // no longer used
   List<String> cmdLines = <String>[];
   List<String> setupLines = <String>[];
-  final String clientHelpText = 'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
+  final String clientHelpText = 'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nquit\n\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
   
   ARCON(String radioFilename, {bool startServer = true, int serverPortNumber = 19791, String address = '', String port = ''}) 
   {
@@ -99,7 +99,7 @@ class ARCON {
     );
     server.listen((client) {
       newConnection(client);
-      client.write('Welcome to ARCON on ${client.remoteAddress}:${client.port}$crlf');
+      client.write('Welcome to ARCON at ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf');
     });
   }
 
@@ -247,6 +247,10 @@ class ARCON {
           client.add(msg.codeUnits);
         }
         // print('debug: $bCmdDebug');
+      }
+      else if (cmd.startsWith('quit')) {
+        client.add('Closing ARCON Control Connection...$crlf'.codeUnits);
+        client.destroy();
       }
       else if(bCmdDebug) {
         print('debug on: send command: $cmd');
@@ -509,10 +513,10 @@ class ARCON {
   /// a specific VFO
   void sendSetVFOFreq(String freqHz, {int vfo = 0}) {
     String freqcmd = '';
-    // String freqDigits = '';
-    if(radioName == 'CODAN') {
-      // ONE special case for CODAN's stupid freq setting command for FreeTx
-      freqcmd = '$freqPrefixA$freqHz $freqHz$freqSuffix';
+    // ONE special case for CODAN's stupid freq setting command for FreeTx
+    if(radioName.startsWith('CODAN')) {
+      // I made this exception because I own a couple :) @guitarpicva
+      freqcmd = '$freqPrefixA $freqHz $freqHz$freqSuffix';
       print('send codan freq: $freqcmd');
     }
     else if (freqType == "CAT") {
@@ -796,15 +800,14 @@ class ARCON {
       return;
     }
     if (isTcp) {
-      print('send TCP command: ${String.fromCharCodes(cmd)}');
+      //print('send TCP command: ${String.fromCharCodes(cmd)}');
+      // use add(), because write() converts to a String for some stupid reason.
       socket.add(cmd.toList());
       socket.flush();
     } 
     else {
       // serial
-      print(
-          'send serial command ${hex.encode(cmd)} -- ${String.fromCharCodes(cmd)}',
-        );
+      //print('send serial command ${hex.encode(cmd)} -- ${String.fromCharCodes(cmd)}');
         serial.write(cmd);
         serial.drain();
     }    
