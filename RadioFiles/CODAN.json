@@ -1,0 +1,43 @@
+{
+    "autoTune": "TUNE AUTO",
+    "connectionMethod": "TCP",
+    "initialSetup": "scan off,scan off,echo off,login admin ''",
+    "modeList": {
+        "USB": "MODE USB",
+        "LSB": "MODE LSB",
+        "CW": "MODE CW",
+        "AM": "MODE AM",
+        "DATA1": "MODE LSBW",
+        "DATA2": "MODE USBW",
+        "DATA3": "MODE USBW"
+    },
+    "pttData": "PTT ON DATA",
+    "pttOff": "PTT OFF",
+    "pttOn": "PTT ON",
+    "radioAddress": "192.168.234.1",
+    "radioName":"CODAN",
+    "queryCommands": {
+        "mode": "MODE",
+        "modeResponsePrefix": "MODE: ",
+        "vfo": "",
+        "vfoAFreq": "FREQ",
+        "vfoAResponse": "",
+        "vfoBFreq": "",
+        "vfoBResponse": ""
+    },"serialBaudRate": 38400,
+    "serialFlowControl": "No Flow Control",
+    "serialParams": "8N1",
+    "splitOff": "",
+    "splitOn": "",
+    "radioTcpPortNumber": 23,
+    "toVFOA": "connect tcvr rf 14150000 14150000",
+    "toVFOB": "connect tcvr rf 14150000 14150000",
+    "txTail": 20,    
+    "frequencyControl": {
+        "order": "CAT",
+        "numDigits": 8,
+        "prefixA": "connect tcvr rf ",
+        "prefixB": "connect tcvr rf ",
+        "suffix": "\r"
+    }
+}

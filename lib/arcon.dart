@@ -44,8 +44,8 @@ class ARCON {
   bool bStartServer = true; // hard coded on for now
   bool bCmdDebug = false; // user can turn it on via the TCP client
   bool bClientConnected = false; // when a TCP control client is connected, true
-  // late SerialPort serial; // Serial connection to radio
-  SerialPort serial = SerialPort(''); // no name (address or port) until setup time
+  late SerialPort serial; // Serial connection to radio
+  // SerialPort serial = SerialPort('?'); // no name (address or port) until setup time
   late Socket socket; // possible TCP connection to radio
   // late ServerSocket server; // now handled anonymously
   late Socket client; // TCP connection to arcon server
@@ -290,7 +290,7 @@ class ARCON {
   void sendCommands() {
     // send first command from cmdLines and remove first
     Timer.periodic(Duration(milliseconds: 75), (t) {
-      print('cmd timer pop -- $cmdLines');
+      // print('cmd timer pop -- $cmdLines');
       if (cmdLines.isEmpty) {
         t.cancel();
         return;
@@ -298,6 +298,7 @@ class ARCON {
       if (freqType == "CAT") {
         var cmd = Uint8List.fromList(cmdLines[0].codeUnits);
         print('sendCommands: cat command -- ${cmdLines[0]}');
+        // print(cmd); // to check for freqSuffix on the end
         sendRadioCommand(cmd);
       } 
       else {        
@@ -647,6 +648,7 @@ class ARCON {
         print("$address: NOT OPEN!");
         serial.dispose();
       }
+      // since the port is open the serial port config is no longer needed
       spc.dispose();
     } catch (se) {
       // connection to radio failed, so
@@ -686,22 +688,26 @@ class ARCON {
 
   // When remote control data is complete over the radio connection, handle it.
   void onRadioDataIn(Uint8List data) {
-    final String indata = (freqType == "CAT")
-        ? String.fromCharCodes(data.toList())
-        : hex.encode(data).toUpperCase();
+    String indata = '';
+    if(freqType == "CAT") {
+      indata = String.fromCharCodes(data.toList());
+    }
+    else {
+      indata = hex.encode(data).toUpperCase();
+    }
     print('onRadioDataIn: indata: $indata');
-    List<String> cmds = indata.split((freqType == "CI-V") ? "FD" : freqSuffix);
-    for (String cmd in cmds) {
+    List<String> inds = indata.split((freqType == "CI-V") ? "FD" : freqSuffix);
+    for (String ind in inds) {
       //print('onRadioDataIn: cmd: $cmd');
       // Check the CI-V commands for ack/nack to discard them
       if (freqType == "CI-V") {
-        if (cmd.endsWith('FB')) {
+        if (ind.endsWith('FB')) {
           continue;  // ACK
         }
-        else if (cmd.endsWith('FA')) {
+        else if (ind.endsWith('FA')) {
           if (bCmdDebug) {
             if (bClientConnected) {
-              client.add('NACK: $cmd$crlf'.codeUnits);
+              client.add('NACK: $ind$crlf'.codeUnits);
             }
           }
           continue; // NACK
@@ -709,25 +715,25 @@ class ARCON {
       }
       if (bCmdDebug) {
         if (bClientConnected) {
-          client.add('$cmd$crlf'.codeUnits);
+          client.add('$ind$crlf'.codeUnits);
         }
       }
       if (bClientConnected) {
-        if (vfoAResponse.isNotEmpty && cmd.startsWith(vfoAResponse)) {
+        if (vfoAResponse.isNotEmpty && ind.startsWith(vfoAResponse)) {
           client.add('vfoa$crlf'.codeUnits);
         } 
-        else if (vfoBResponse.isNotEmpty && cmd.startsWith(vfoBResponse)) {
+        else if (vfoBResponse.isNotEmpty && ind.startsWith(vfoBResponse)) {
           print('dataIn: got vfob');
           client.add('vfob$crlf'.codeUnits);
         } 
         else if (!modeResponsePrefix.isEmpty &&
-            cmd.startsWith(modeResponsePrefix)) {
+            ind.startsWith(modeResponsePrefix)) {
           // by looking up against the modeList values
-          print('dataIn: got mode $cmd');
+          print('dataIn: got mode $ind');
           if (freqType == "CAT") {
             for (String mode in modeList.keys) {
               print('dataIn: CAT modeList mode: $mode');
-              if (modeList[mode] == cmd) {
+              if (modeList[mode] == ind) {
                 print('found CAT mode: $mode');
 
                 client.add('mode $mode$crlf'.codeUnits);
@@ -738,12 +744,12 @@ class ARCON {
           else if (freqType == "CI-V") {
             List<String> prefixes = modeResponsePrefix.split(',');
             for (String pre in prefixes) {
-              if (cmd.startsWith(pre)) {
-                print('dataIn: CI-V cmd match: $cmd');
+              if (ind.startsWith(pre)) {
+                print('dataIn: CI-V cmd match: $ind');
                 for (String civmode in modeList.values) {
                   String mode = civmode.substring(10);
-                  print('dataIn: civ mode: $mode cmd: $cmd');
-                  if (cmd.contains(mode)) {
+                  print('dataIn: civ mode: $mode cmd: $ind');
+                  if (ind.contains(mode)) {
                     // qDebug()<<"found mode:"<<mode;
                     // qDebug()<<"key:"<<modeList.key(civmode);
                     break;
@@ -753,30 +759,30 @@ class ARCON {
             }
           }
         } 
-        else if (cmd.startsWith(vfoAFreqResponse)) {
-          print('dataIn: vfoa freq response: $cmd');
+        else if (ind.startsWith(vfoAFreqResponse)) {
+          print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
             client.add(
-              'vfoa ${cmd.substring(freqPrefixA.length)}$crlf'.codeUnits,
+              'vfoa ${ind.substring(freqPrefixA.length)}$crlf'.codeUnits,
             );
           } else if (freqType == "CI-V") {
             // const int lenny = freqPrefixA.length();
-            client.add('vfoa ${getCIVFreq(cmd)}$crlf'.codeUnits);
+            client.add('vfoa ${getCIVFreq(ind)}$crlf'.codeUnits);
           } else if (freqType == "BCD") {
-            client.add('vfob ${getBCDFreq(cmd)}$crlf'.codeUnits);
+            client.add('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
           }
         } 
-        else if (cmd.startsWith(vfoBFreqResponse)) {
-          print('dataIn: vfoa freq response: $cmd');
+        else if (ind.startsWith(vfoBFreqResponse)) {
+          print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
             client.add(
-              'vfob ${cmd.substring(freqPrefixB.length)}$crlf'.codeUnits,
+              'vfob ${ind.substring(freqPrefixB.length)}$crlf'.codeUnits,
             );
           } else if (freqType == "CI-V") {
             // const int lenny = freqPrefixA.length();
-            client.add('vfob ${getCIVFreq(cmd)}$crlf)'.codeUnits);
+            client.add('vfob ${getCIVFreq(ind)}$crlf)'.codeUnits);
           } else if (freqType == "BCD") {
-            client.add('vfob ${getBCDFreq(cmd)}$crlf'.codeUnits);
+            client.add('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
           }
         }
       }
@@ -791,19 +797,17 @@ class ARCON {
     }
     if (isTcp) {
       print('send TCP command: ${String.fromCharCodes(cmd)}');
-      socket.write(cmd);
+      socket.add(cmd.toList());
       socket.flush();
     } 
     else {
       // serial
-      if (serial != null) {
-        print(
+      print(
           'send serial command ${hex.encode(cmd)} -- ${String.fromCharCodes(cmd)}',
         );
         serial.write(cmd);
         serial.drain();
-      }
-    }
+    }    
   }
 
   // Frequency command builder utiility functions for CI-V
