@@ -654,10 +654,8 @@ class ARCON {
           address = address.substring(5);
         }
         serial = SerialPort('/dev/$address'); // i.e. ttyACM0
-
         open = serial.openReadWrite();
         serial.config = spc;
-        // spc.dtr = 1; // Windows is weird
         print('Port: $address speed: $speed');
       } 
       else {
@@ -681,8 +679,8 @@ class ARCON {
             // Close the reader and serial port and re-open later to recover
             reader.close();
             serial.close();
-            Timer(const Duration(seconds: 2), () {
-              getSerialRadio(address, speed);
+            Timer(const Duration(seconds: 2), () async {
+              await getSerialRadio(address, speed);
             });
           },
           onDone: () {
@@ -862,8 +860,12 @@ class ARCON {
     else {
       // serial
       //print('send serial command ${hex.encode(cmd)} -- ${String.fromCharCodes(cmd)}');
-        serial.write(cmd);
-        serial.drain();
+        try {serial.write(cmd);
+          serial.drain();
+        }
+        catch(e) {
+          getSerialRadio(radioAddress, serialBaudRate);
+        }
     }    
   }
 
