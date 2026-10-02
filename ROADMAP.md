@@ -9,8 +9,6 @@ The addition of other functionality will extend the usefulness of ARCON using a 
 
 * Add TLS Connectivity
 
-TLS is a basic functional need, and should be one of, if not the first, extensions made to ARCON.
-
 * Control of commercial radios
 
 This may require a fork due to various idiosyncracies of commercial radio firmware.  Every manufacturer is potentially completely different.  This would be a more "Hamlib" sort of solution but since the list is somewhat short, not out of the realm of possiblilty.  CURRENTLY: CODAN radios have basic functionality, as well as the ICOM IC-F8101E using the current ARCON system.
