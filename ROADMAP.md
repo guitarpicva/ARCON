@@ -21,4 +21,4 @@ Such as data modems or various linking systems (2G/3G/4G ALE, DStar data, Pactor
 
 * MQTT Client Capabilities
 
-The addition of industry standard message passing using MQTT will facilitate the ability to have radio systems work in concert with one another as a "unit".  This work is largely done already elsewhere, so it may be realized rather quickly.
+The addition of industry standard message passing using MQTT will facilitate the ability to have radio systems work in concert with one another as a "unit".  This work is largely done already in other projects, so it may be realized rather quickly.
