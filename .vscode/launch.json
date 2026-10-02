@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.1.0",
     "configurations": [
+
         {
             "name": "arconkx3",
             "type": "dart",
@@ -23,12 +24,12 @@
             ]
         },
         {
-            "name": "arcon705",
+            "name": "arcon4100a",
             "request": "launch",
             "type": "dart",
             "program": "./bin/arcon.dart",
             "args": [
-                "RadioFiles/IC-705.json"
+                "RadioFiles/ID-4100A.json" 
             ]
         },
         {

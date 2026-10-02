@@ -1,0 +1,49 @@
+{
+    "autoTune": "",
+    "commandTimeout": 20,
+    "connectionMethod": "SERIAL",
+    "controlType": "BINARY",
+    "frequencyControl": {
+        "numDigits": 10,
+        "order": "CI-V",
+        "prefixA": "FEFE9AE005",
+        "prefixB": "FEFE9AE005",
+        "suffix": "FD"
+    },
+    "initialSetup": "FEFE9AE007,FEFE9AE01701,FEFE9AE0220301,FEFE9AE0220201,FEFE9AE0220500",
+    "modeList": {
+        "FM": "FEFE9AE0060501",
+        "CW": "",
+        "DATA1": "FEFE9AE0061701",
+        "DATA2": "",
+        "DATA3": "",
+        "LSB": "",
+        "RTTY": "",
+        "USB": ""
+    },
+    "portTimeout": 10,
+    "pttData": "FEFE9AE01C0001",
+    "pttOff": "FEFE9AE01C0000",
+    "pttOn": "FEFE9AE01C0001",
+    "queryCommands": {
+        "mode": "FEFE9AE004",
+        "modeResponsePrefix": "FEFEE09A04",
+        "vfo": "",
+        "vfoAFreq": "FEFE9AE003",
+        "vfoAFreqResponse": "FEFEE09A03",
+        "vfoAResponse": "",
+        "vfoBFreq": "FEFE9AE003",
+        "vfoBFreqResponse": "FEFEE09A03",
+        "vfoBResponse": ""
+    },
+    "radioAddress": "ttyUSB1",
+    "radioName": "ID-4100A",
+    "radioTcpPortNumber": 0,
+    "serialBaudRate": 19200,
+    "serialFlowControl": "No Flow Control",
+    "serialParams": "8N1",
+    "toVFOA": "FEFE9AE007",
+    "toVFOB": "FEFE9AE007",
+    "toggleSplit": "",
+    "txTail": 20
+}

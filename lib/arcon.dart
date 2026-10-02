@@ -25,6 +25,7 @@ class ARCON {
   String toVFOB = '';
   String autoTune = ''; // which mode is in use -- compare reply to modeList values
   String modeQuery = '';
+  String indata = ''; // for reading the data from the radio control port
   String vfoQuery = ''; // which vfo is in use
   String vfoAFreq = ''; // query VFO A frequency
   String vfoBFreq = ''; // query VFO B frequency
@@ -421,7 +422,7 @@ class ARCON {
         for (String key in jsonModes.keys) {
           modeList[key] = jsonModes[key];
         }
-        // print('modeList: $modeList');
+        print('modeList: $modeList');
       }
 
       var freqtmp = jsonEncode(jsonMap['frequencyControl']);
@@ -541,7 +542,8 @@ class ARCON {
   /// Send the command from the [modeList] Map to change the mode. 
   void sendSetMode(final String modeName) {
     // gather the mode command by name from the [modeList] Map
-    var modecmd = modeList[modeName];
+    var modecmd = modeList[modeName];    
+    print('mode cmd: $modeName : $modecmd');
     if (modecmd != null && modecmd.isNotEmpty) {
       for (String line in modecmd.split(',')) {
         cmdLines.add('$line$freqSuffix');
@@ -734,17 +736,20 @@ class ARCON {
 
   // When remote control data is complete over the radio connection, handle it.
   void onRadioDataIn(Uint8List data) {
-    String indata = '';
+    
     if(freqType == "CAT") {
-      indata = String.fromCharCodes(data.toList());
+      indata += String.fromCharCodes(data.toList());
     }
     else {
-      indata = hex.encode(data).toUpperCase();
+      indata += hex.encode(data).toUpperCase();
     }
     print('onRadioDataIn: indata: $indata');
+    if(!indata.contains(freqSuffix)) { return; } // to get more
     List<String> inds = indata.split((freqType == "CI-V") ? "FD" : freqSuffix);
+    // print('show radio in bytes: $inds');
+    indata = indata.substring(indata.lastIndexOf(freqSuffix) + freqSuffix.length);
     for (String ind in inds) {
-      //print('onRadioDataIn: cmd: $cmd');
+      print('onRadioDataIn: ind: $ind');
       // Check the CI-V commands for ack/nack to discard them
       if (freqType == "CI-V") {
         if (ind.endsWith('FB')) {
@@ -791,14 +796,21 @@ class ARCON {
             List<String> prefixes = modeResponsePrefix.split(',');
             for (String pre in prefixes) {
               if (ind.startsWith(pre)) {
-                print('dataIn: CI-V cmd match: $ind');
+                // print('dataIn: CI-V cmd match: $ind');
+                print('modeList: $modeList');
                 for (String civmode in modeList.values) {
-                  String mode = civmode.substring(10);
-                  print('dataIn: civ mode: $mode cmd: $ind');
-                  if (ind.contains(mode)) {
-                    // qDebug()<<"found mode:"<<mode;
-                    // qDebug()<<"key:"<<modeList.key(civmode);
-                    break;
+                  if(civmode.isEmpty) { continue; }
+                  final String mode = civmode.substring(modeResponsePrefix.length);                
+                  print('dataIn: civ mode: $mode cmd: $ind - ${ind.endsWith(mode)}');
+                  if (ind.endsWith(mode)) {
+                    for(String match in modeList.keys) {
+                      print('match: $match');
+                      var modematch = modeList[match];
+                      if(modematch != null && modematch.endsWith(mode)) {
+                        client.add('mode $match$crlf'.codeUnits);
+                        break;
+                      }
+                    }
                   }
                 }
               }
