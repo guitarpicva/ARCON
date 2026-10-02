@@ -44,10 +44,12 @@ class ARCON {
   bool bStartServer = true; // hard coded on for now
   bool bCmdDebug = false; // user can turn it on via the TCP client
   bool bClientConnected = false; // when a TCP control client is connected, true
-  late SerialPort serial; // Serial connection to radio
-  // SerialPort serial = SerialPort('?'); // no name (address or port) until setup time
-  late Socket socket; // possible TCP connection to radio
-  // late ServerSocket server; // now handled anonymously
+  /// [bSecureClient]. If true, use a TLS SecureServerSocket instead of
+  /// a std ServerSocket -- TLS CONNECTIVITY NOT YET FUNCTIONAL
+  bool bSecureClient = false;
+  late SerialPort serial; // possible Serial connection to radio
+  late Socket socket; // possible TCP control connection to radio
+  late SecureSocket sclient; // TLS covered client connection
   late Socket client; // TCP connection to arcon server
   List<int> clientBytes = <int>[];
   // List<int> inbytes = <int>[]; // no longer used
@@ -89,18 +91,35 @@ class ARCON {
 
   /// Start the TCP socket server awaiting a connection from a TCP client
   /// socket which processes action commands and query commands from the user
-  /// space.
+  /// space.  Client may connect plain or secure (TLS).
   Future<void> startARCONServer() async {
     // only one active connection to the radio (for now)
-    var server = await ServerSocket.bind(
-      InternetAddress.anyIPv4,
-      19791,
-      shared: false,
-    );
-    server.listen((client) {
-      newConnection(client);
-      client.write('Welcome to ARCON at ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf');
-    });
+    if(bSecureClient) {
+      var server = await SecureServerSocket.bind(
+        InternetAddress.anyIPv4,
+        19791,
+        SecurityContext.defaultContext,
+        requestClientCertificate: false,
+        requireClientCertificate: false,
+        shared: false,
+        supportedProtocols: ['TLSv1.2', 'TLSv1.3']
+      );
+      server.listen((client) {
+        newSecureConnection(client);
+        client.write('TLS: Welcome to ARCON at ${sclient.remoteAddress.address}:${sclient.port}${crlf}Radio File: $radioFile$crlf');
+      });
+    }
+    else { // plain TCP socket
+      var server = await ServerSocket.bind(
+        InternetAddress.anyIPv4,
+        19791,
+        shared: false,
+      );
+      server.listen((client) {
+        newConnection(client);
+        client.write('Welcome to ARCON at ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf');
+      });
+    }
   }
 
   /// A TCP connection has arrived at the TCP server so make it the active
@@ -123,6 +142,29 @@ class ARCON {
         client.close();
         bClientConnected = false;
       },
+    );
+  }
+
+    /// A TCP connection has arrived at the TCP server so make it the active
+  /// connection for commands and queries.
+  void newSecureConnection(SecureSocket clientSocket) {
+    sclient = clientSocket;
+    sclient.setOption(SocketOption.tcpNoDelay, true);
+    print('TCP client connected...');
+    bClientConnected = true;    
+    sclient.listen(    
+      (Uint8List data) async {
+        processClientData(data);
+      },
+      cancelOnError: false,
+      onError: (error) {
+        print('TCP client error: $error');
+      },
+      onDone: () {
+        print('TCP client finished...');
+        sclient.close();
+        bClientConnected = false;
+      }
     );
   }
 
