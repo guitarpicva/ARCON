@@ -1,0 +1,45 @@
+{
+    "autoTune": "FEFE94E01C0102",
+    "commandTimeout": 40,
+    "connectionMethod": "SERIAL",
+    "frequencyControl": {
+        "numDigits": 10,
+        "order": "CI-V",
+        "prefixA": "FEFE94E005",
+        "prefixB": "FEFE94E005",
+        "suffix": "FD"
+    },
+    "initialSetup": "FEFE94E00700,FEFE94E00601",
+    "modeList": {
+        "AM": "FEFE94E0602",
+        "CW": "FEFE94E0603",
+        "DATA1": "FEFE94E01A040101",
+        "DATA2": "FEFE94E01A040102",
+        "DATA3": "FEFE94E01A040103",
+        "LSB": "FEFE94E0600",
+        "RTTY": "FEFE94E0604",
+        "USB": "FEFE94E0601"
+    },
+    "portTimeout": 40,
+    "pttData": "FEFE94E01C0001",
+    "pttOff": "FEFE94E01C0000",
+    "pttOn": "FEFE94E01C0001",
+    "queryCommands": {
+        "mode": "FEFE94E004",
+        "modeResponsePrefix": "FEFEE09404",
+        "vfo": "FEFE94E007",
+        "vfoAFreq": "FEFE94E003",
+        "vfoAFreqResponse": "FEFEE09403",
+        "vfoAResponse": "FEFEE0940700",
+        "vfoBFreq": "FEFE94E003",
+        "vfoBFreqResponse": "FEFEE09403",
+        "vfoBResponse": "FEFEE0940701"
+    },
+    "radioAddress": "COM9",
+    "radioName": "IC-7300",
+    "serialBaudRate": 19200,
+    "serialFlowControl": "No Flow Control",
+    "serialParams": "8N1",
+    "tcpPortNumber": 23,
+    "txTail": 20
+}

@@ -1,0 +1,45 @@
+{
+    "autoTune": "FEFE76E01C0102",
+    "commandTimeout": 40,
+    "connectionMethod": "SERIAL",
+    "frequencyControl": {
+        "numDigits": 10,
+        "order": "CI-V",
+        "prefixA": "FEFE76E005",
+        "prefixB": "FEFE76E005",
+        "suffix": "FD"
+    },
+    "initialSetup": "FEFE76E00700,FEFE76E00601",
+    "modeList": {
+        "AM": "FEFE76E0602",
+        "CW": "FEFE76E0603",
+        "DATA1": "FEFE76E01A040101",
+        "DATA2": "FEFE76E01A040102",
+        "DATA3": "FEFE76E01A040103",
+        "LSB": "FEFE76E0600",
+        "RTTY": "FEFE76E0604",
+        "USB": "FEFE76E0601"
+    },
+    "portTimeout": 40,
+    "pttData": "FEFE76E01C0001",
+    "pttOff": "FEFE76E01C0000",
+    "pttOn": "FEFE76E01C0001",
+    "queryCommands": {
+        "mode": "FEFE76E004",
+        "modeResponsePrefix": "FEFEE07604",
+        "vfo": "FEFE76E007",
+        "vfoAFreq": "FEFE76E003",
+        "vfoAFreqResponse": "FEFEE07603",
+        "vfoAResponse": "FEFEE0760700",
+        "vfoBFreq": "FEFE76E003",
+        "vfoBFreqResponse": "FEFEE07603",
+        "vfoBResponse": "FEFEE0760701"
+    },
+    "radioAddress": "COM9",
+    "radioName": "IC-7200",
+    "serialBaudRate": 19200,
+    "serialFlowControl": "No Flow Control",
+    "serialParams": "8N1",
+    "tcpPortNumber": 23,
+    "txTail": 20
+}
