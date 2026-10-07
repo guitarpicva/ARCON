@@ -79,7 +79,7 @@ class ARCON {
         serialBaudRate = int.parse(port);
       }
     }
-    print('address: $radioAddress -- port: $radioTcpPortNumber/$serialBaudRate');
+    print('\x1b[35mAddress: $radioAddress -- port: $radioTcpPortNumber/$serialBaudRate\x1b[0m]');
     // timers for ports were here in C++
     // start the connection to the radio
     startControlConnection();
@@ -95,20 +95,31 @@ class ARCON {
   /// space.  Client may connect plain or secure (TLS).
   Future<void> startARCONServer() async {
     // only one active connection to the radio (for now)
+    // TEST
+    // bSecureClient = true;
+    // END TEST
     if(bSecureClient) {
+      var context = SecurityContext.defaultContext;
+      context.minimumTlsProtocolVersion = TlsProtocolVersion.tls1_2;
+      context.setTrustedCertificates('/home/mitch/testca.pem');
+      context.useCertificateChain('/home/mitch/testcrt.pem');
+      context.usePrivateKey('/home/mitch/testprivkey.pem');
+      print(context.allowLegacyUnsafeRenegotiation = true);
       var server = await SecureServerSocket.bind(
         InternetAddress.anyIPv4,
         19791,
-        SecurityContext.defaultContext,
+        context,
         requestClientCertificate: false,
         requireClientCertificate: false,
-        shared: false,
-        supportedProtocols: ['TLSv1.2', 'TLSv1.3']
+        shared: false
       );
       server.listen((client) {
         newSecureConnection(client);
-        client.write('TLS: Welcome to ARCON at ${sclient.remoteAddress.address}:${sclient.port}${crlf}Radio File: $radioFile$crlf');
-      });
+        client.write('\x1b[31mTLS: Welcome to ARCON at TLS ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf\x1b[0m');
+      },
+      onError:((e) {print(e);}),
+      );
+        
     }
     else { // plain TCP socket
       var server = await ServerSocket.bind(
@@ -118,8 +129,19 @@ class ARCON {
       );
       server.listen((client) {
         newConnection(client);
-        client.write('Welcome to ARCON at ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf');
+        client.write('\x1b[35mWelcome to ARCON at ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf\x1b[0m');
       });
+    }
+  }
+
+  void writeToClient(List<int> data) {
+    if(bSecureClient) {
+      sclient.add(data);
+      sclient.flush();
+    }
+    else {
+      client.add(data);
+      client.flush();
     }
   }
 
@@ -151,6 +173,7 @@ class ARCON {
   void newSecureConnection(SecureSocket clientSocket) {
     sclient = clientSocket;
     sclient.setOption(SocketOption.tcpNoDelay, true);
+    print(sclient.selectedProtocol);
     print('TCP client connected...');
     bClientConnected = true;    
     sclient.listen(    
@@ -260,7 +283,7 @@ class ARCON {
         sendSplitToggle();
       }
       else if (cmd.startsWith("help")) {
-        client.add(clientHelpText.codeUnits);
+        writeToClient(clientHelpText.codeUnits);
       } 
       else if (cmd.startsWith("radiofile")) {
         List<String> parts = cmd.trim().split(' ');
@@ -268,14 +291,14 @@ class ARCON {
           // load the new path to the new RSON file
           radioFile = parts[1].trim();
           var msg = 'Loading radiofile $radioFile...$crlf';
-          client.add(msg.codeUnits);  
+          writeToClient(msg.codeUnits);  
         }
         loadRadioFile();
       }
       else if (cmd.startsWith("restart")) {
         startOver(radioFile);
         var msg = 'restarting $radioFile$crlf';
-        client.add(msg.codeUnits);
+        writeToClient(msg.codeUnits);
         //print('restart with current radio file ${radioFile.split("/").last}');
         return; // just in case things are added after this
       } 
@@ -287,13 +310,14 @@ class ARCON {
           // print('parts[1]: ${parts[1]} -- ${parts[1].trim() == 'on'}');
           bCmdDebug = (parts[1].trim() == 'on');
           var msg = 'cmd debug: ${parts[1]}$crlf';
-          client.add(msg.codeUnits);
+          writeToClient(msg.codeUnits);
         }
         // print('debug: $bCmdDebug');
       }
       else if (cmd.startsWith('quit')) {
-        client.add('Closing ARCON Control Connection...$crlf'.codeUnits);
-        client.destroy();
+        writeToClient('Closing ARCON Control Connection...$crlf'.codeUnits);
+        if(bSecureClient) { sclient.destroy(); }
+        else { client.destroy(); }
       }
       else if(bCmdDebug) {
         print('debug on: send command: $cmd');
@@ -362,9 +386,14 @@ class ARCON {
 
   /// Given a possibly new RSON filename, restart the system.
   Future<void> startOver(final String radioFilename) async {
-    await serial.close();
-    // TODO how to do this if not used socket != null is an error
-    //await socket.destroy;
+    if(isTcp) {
+      await socket.flush();
+      socket.destroy();
+    }
+    else {
+      await serial.close();
+    }
+    
     // load the model for the radio to connect to
     loadRadioFile();    
     // restart the connection to the configured radio device  
@@ -728,7 +757,7 @@ class ARCON {
   void onSocketConnected() {
     if(bCmdDebug) {
       print('onSocketConnected...');
-      client.add('onSocketConnected'.codeUnits);
+      writeToClient('onSocketConnected'.codeUnits);
     }
   }
 
@@ -756,7 +785,7 @@ class ARCON {
         else if (ind.endsWith('FA')) {
           if (bCmdDebug) {
             if (bClientConnected) {
-              client.add('NACK: $ind$crlf'.codeUnits);
+              writeToClient('NACK: $ind$crlf'.codeUnits);
             }
           }
           continue; // NACK
@@ -764,16 +793,16 @@ class ARCON {
       }
       if (bCmdDebug) {
         if (bClientConnected) {
-          client.add('$ind$crlf'.codeUnits);
+          writeToClient('$ind$crlf'.codeUnits);
         }
       }
       if (bClientConnected) {
         if (vfoAResponse.isNotEmpty && ind.startsWith(vfoAResponse)) {
-          client.add('vfoa$crlf'.codeUnits);
+          writeToClient('vfoa$crlf'.codeUnits);
         } 
         else if (vfoBResponse.isNotEmpty && ind.startsWith(vfoBResponse)) {
           print('dataIn: got vfob');
-          client.add('vfob$crlf'.codeUnits);
+          writeToClient('vfob$crlf'.codeUnits);
         } 
         else if (!modeResponsePrefix.isEmpty &&
             ind.startsWith(modeResponsePrefix)) {
@@ -784,8 +813,7 @@ class ARCON {
               print('dataIn: CAT modeList mode: $mode');
               if (modeList[mode] == ind) {
                 print('found CAT mode: $mode');
-
-                client.add('mode $mode$crlf'.codeUnits);
+                writeToClient('mode $mode$crlf'.codeUnits);  
                 break;
               }
             }
@@ -805,7 +833,7 @@ class ARCON {
                       print('match: $match');
                       var modematch = modeList[match];
                       if(modematch != null && modematch.endsWith(mode)) {
-                        client.add('mode $match$crlf'.codeUnits);
+                        writeToClient('mode $match$crlf'.codeUnits);
                         break;
                       }
                     }
@@ -818,27 +846,26 @@ class ARCON {
         else if (ind.startsWith(vfoAFreqResponse)) {
           print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
-            client.add(
-              'vfoa ${ind.substring(freqPrefixA.length)}$crlf'.codeUnits,
-            );
+            writeToClient(
+              'vfoa ${ind.substring(freqPrefixA.length)}$crlf'.codeUnits);
           } else if (freqType == "CI-V") {
             // const int lenny = freqPrefixA.length();
             client.add('vfoa ${getCIVFreq(ind)}$crlf'.codeUnits);
           } else if (freqType == "BCD") {
-            client.add('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
+            writeToClient('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
           }
         } 
         else if (ind.startsWith(vfoBFreqResponse)) {
           print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
-            client.add(
+            writeToClient(
               'vfob ${ind.substring(freqPrefixB.length)}$crlf'.codeUnits,
             );
           } else if (freqType == "CI-V") {
             // const int lenny = freqPrefixA.length();
-            client.add('vfob ${getCIVFreq(ind)}$crlf)'.codeUnits);
+            writeToClient('vfob ${getCIVFreq(ind)}$crlf)'.codeUnits);
           } else if (freqType == "BCD") {
-            client.add('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
+            writeToClient('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
           }
         }
       }

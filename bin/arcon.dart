@@ -24,7 +24,7 @@ void printUsage(ArgParser argParser) {
   print(argParser.usage);
 }
 
-void main(List<String> arguments) {
+void main(List<String> arguments) {  
   String address = '';
   String port = '';
   final ArgParser argParser = buildParser();
