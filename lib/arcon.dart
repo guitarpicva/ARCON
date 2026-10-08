@@ -130,7 +130,11 @@ class ARCON {
       server.listen((client) {
         newConnection(client);
         client.write('\x1b[35mWelcome to ARCON at ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf\x1b[0m');
-      });
+      },
+      onDone:()=>print('server socket done...'),
+      onError:(e) {
+        print('server socket error: ${e.toString()}');
+      });    
     }
   }
 
