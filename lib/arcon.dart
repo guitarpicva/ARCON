@@ -433,39 +433,31 @@ class ARCON {
       pttOn = jsonMap['pttOn'].toString();
       pttOff = jsonMap['pttOff'].toString();
       pttData = jsonMap['pttData'].toString();
-      txTail = int.parse(
-        jsonMap['txTail'].toString(),
-      ); // def. 20 ms for bad/missing value
+      txTail = int.parse(jsonMap['txTail'].toString()); // def. 20 ms for bad/missing value
       splitOn = jsonMap['splitOn'].toString();
       splitOff = jsonMap['splitOff'].toString();
       toVFOA = jsonMap['toVFOA'].toString();
       toVFOB = jsonMap['toVFOB'].toString();
       autoTune = jsonMap['autoTune'].toString();
-      // modes list Map<String, String>
-      var modetmp = jsonEncode(jsonMap['modeList']);
-      // print('modetmp: $modetmp');
+      // now the list of modes
+      var modetmp = jsonMap['modeList'] as Map;
       modeList.clear();
       if (modetmp != null) {
-        var jsonModes = jsonDecode(modetmp);
-        // print('jsonModes: $jsonModes -- ${jsonModes.keys}');
-        for (String key in jsonModes.keys) {
-          modeList[key] = jsonModes[key];
+        for (String key in modetmp.keys) {
+          modeList[key] = modetmp[key];
         }
-        print('modeList: $modeList');
+        // print('modeList: $modeList');
       }
-
-      var freqtmp = jsonEncode(jsonMap['frequencyControl']);
+      var freqtmp = jsonMap['frequencyControl'] as Map;
       if (freqtmp != null) {
-        var freqValues = jsonDecode(freqtmp);
-        freqLength = int.parse(freqValues['numDigits'].toString());
-        freqType = freqValues['order'].toString();
-        freqPrefixA = freqValues['prefixA'].toString();
-        freqPrefixB = freqValues['prefixB'].toString();
-        freqSuffix = freqValues['suffix'].toString();
+        freqLength = int.parse(freqtmp['numDigits'].toString());
+        freqType = freqtmp['order'].toString();
+        freqPrefixA = freqtmp['prefixA'].toString();
+        freqPrefixB = freqtmp['prefixB'].toString();
+        freqSuffix = freqtmp['suffix'].toString();
       }
-      var querytmp = jsonEncode(jsonMap['queryCommands']);
-      if (querytmp != null) {
-        var queryValues = jsonDecode(querytmp);
+      var queryValues = jsonMap['queryCommands'] as Map;
+      if (queryValues != null) {
         modeQuery = queryValues['mode'].toString();
         modeResponsePrefix = queryValues['modeResponsePrefix'].toString();
         vfoQuery = queryValues['vfo'].toString();
