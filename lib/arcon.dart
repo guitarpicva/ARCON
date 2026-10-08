@@ -137,11 +137,11 @@ class ARCON {
   void writeToClient(List<int> data) {
     if(bSecureClient) {
       sclient.add(data);
-      sclient.flush();
+      // sclient.flush();
     }
     else {
       client.add(data);
-      client.flush();
+      // client.flush();
     }
   }
 
@@ -321,9 +321,11 @@ class ARCON {
       }
       else if(bCmdDebug) {
         print('debug on: send command: $cmd');
-        print('debug cmd: $cmd$freqSuffix');// until done, then cancels the timer.
+        print('debug cmd: $cmd$freqSuffix');
+        if(cmd.trim().isNotEmpty) {
           cmdLines.add('$cmd$freqSuffix');
           sendCommands();
+        }
       }
     }
   }
@@ -337,22 +339,25 @@ class ARCON {
     if (cmd.trim().isEmpty) {
       return;
     }
-    out = cmd.toUpperCase(); // TODO: TEMPORARY TEST for raw commands
+    out = cmd.toUpperCase();
     if (cmd.startsWith("vfoa")) {
       out = vfoAFreq;
-    } else if (cmd.startsWith("vfob")) {
+    } 
+    else if (cmd.startsWith("vfob")) {
       out = vfoBFreq;
-    } else if (cmd.startsWith("vfo")) {
+    } 
+    else if (cmd.startsWith("vfo")) {
       out = vfoQuery;
-    } else if (cmd.startsWith("mode")) {
+    } 
+    else if (cmd.startsWith("mode")) {
       out = modeQuery;
       print('mode query: $out');
     }
     for (String line in out.split(',')) {
       cmdLines.add('$line$freqSuffix');
     }
-    print('queryCommands: $cmdLines ${cmdLines.length}');
     sendCommands();
+    print('queryCommands: $cmdLines ${cmdLines.length}');    
   }
 
   /// A [List<String>] of commands, [cmdList] is cycled through with an 
@@ -366,13 +371,13 @@ class ARCON {
         t.cancel();
         return;
       }
-      if (freqType == "CAT") {
+      if (freqType == "CAT") { // ASCII commands as is
         var cmd = Uint8List.fromList(cmdLines[0].codeUnits);
         print('sendCommands: cat command -- ${cmdLines[0]}');
         // print(cmd); // to check for freqSuffix on the end
         sendRadioCommand(cmd);
       } 
-      else {        
+      else { // CI-V or BCD which are binary so translate
         var fromhex = hex.decode(cmdLines[0]);
         var cmd = Uint8List.fromList(fromhex);
         sendRadioCommand(cmd);
@@ -387,11 +392,11 @@ class ARCON {
   /// Given a possibly new RSON filename, restart the system.
   Future<void> startOver(final String radioFilename) async {
     if(isTcp) {
-      await socket.flush();
+      // await socket.flush();
       socket.destroy();
     }
     else {
-      await serial.close();
+      serial.close();
     }
     
     // load the model for the radio to connect to
@@ -442,14 +447,14 @@ class ARCON {
       // now the list of modes
       var modetmp = jsonMap['modeList'] as Map;
       modeList.clear();
-      if (modetmp != null) {
+      if (modetmp.isNotEmpty) {
         for (String key in modetmp.keys) {
           modeList[key] = modetmp[key];
         }
         // print('modeList: $modeList');
       }
       var freqtmp = jsonMap['frequencyControl'] as Map;
-      if (freqtmp != null) {
+      if (freqtmp.isNotEmpty) {
         freqLength = int.parse(freqtmp['numDigits'].toString());
         freqType = freqtmp['order'].toString();
         freqPrefixA = freqtmp['prefixA'].toString();
@@ -457,7 +462,7 @@ class ARCON {
         freqSuffix = freqtmp['suffix'].toString();
       }
       var queryValues = jsonMap['queryCommands'] as Map;
-      if (queryValues != null) {
+      if (queryValues.isNotEmpty) {
         modeQuery = queryValues['mode'].toString();
         modeResponsePrefix = queryValues['modeResponsePrefix'].toString();
         vfoQuery = queryValues['vfo'].toString();
@@ -796,7 +801,7 @@ class ARCON {
           print('dataIn: got vfob');
           writeToClient('vfob$crlf'.codeUnits);
         } 
-        else if (!modeResponsePrefix.isEmpty &&
+        else if (modeResponsePrefix.isNotEmpty &&
             ind.startsWith(modeResponsePrefix)) {
           // by looking up against the modeList values
           print('dataIn: got mode $ind');
@@ -838,7 +843,7 @@ class ARCON {
         else if (ind.startsWith(vfoAFreqResponse)) {
           print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
-            writeToClient(
+             writeToClient(
               'vfoa ${ind.substring(freqPrefixA.length)}$crlf'.codeUnits);
           } else if (freqType == "CI-V") {
             // const int lenny = freqPrefixA.length();
@@ -867,14 +872,14 @@ class ARCON {
   /// Send a single radio command to the radio device either via serial port
   /// or TCP socket.  The [cmd] must be fully formed.
   void sendRadioCommand(Uint8List cmd) {
-    if (cmd.isEmpty) {
+    if (cmd.length < 2) {
       return;
     }
     if (isTcp) {
       //print('send TCP command: ${String.fromCharCodes(cmd)}');
       // use add(), because write() converts to a String for some stupid reason.
       socket.add(cmd.toList());
-      socket.flush();
+      // socket.flush();
     } 
     else {
       // serial
@@ -1033,9 +1038,6 @@ class ARCON {
   /// File-path of the RSON (JSON) file to configure the radio.
   void setRadioFile(final String radiofile) {
     radioFile = radiofile;
-    // TODO decide if this is necessary or let the user then call the
-    // startOver() function directly.
-    // startOver(radioFile); 
   }
 
   /// TCP port number of the radio connection if required.
