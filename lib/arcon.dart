@@ -162,7 +162,7 @@ class ARCON {
       },
       onDone: () {
         print('TCP client finished...');
-        client.close();
+        // client.close();
         bClientConnected = false;
       },
     );
@@ -186,7 +186,7 @@ class ARCON {
       },
       onDone: () {
         print('TCP client finished...');
-        sclient.close();
+        // sclient.close();
         bClientConnected = false;
       }
     );
