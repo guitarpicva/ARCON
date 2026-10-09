@@ -58,11 +58,12 @@ class ARCON {
   List<String> setupLines = <String>[];
   final String clientHelpText = 'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nquit\n\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
   
-  ARCON(String radioFilename, {bool startServer = true, int serverPortNumber = 19791, String address = '', String port = ''}) 
+  ARCON(String radioFilename, {bool startServer = true, int serverPortNumber = 19791, String address = '', String port = '', bool secure = false}) 
   {
     print('RadioFile: $radioFilename');
     radioFile = radioFilename;
     bStartServer = startServer;
+    bSecureClient = secure;
     serverListenPortNumber = serverPortNumber;
 
     // load the model for the radio to connect to

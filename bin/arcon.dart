@@ -15,6 +15,7 @@ ArgParser buildParser() {
       help: 'Print this usage information.',
     )
     ..addFlag('version', negatable: false, help: 'Print the tool version.')
+    ..addFlag('secure', negatable: false, help: 'Start the server in TLS mode.')
     ..addOption('address', abbr: 'a', help: 'The radio TCP address or serial port name.')
     ..addOption('port_or_baud', abbr: 'p', help: 'The radio TCP port or Serial baud rate.');
 }
@@ -27,6 +28,7 @@ void printUsage(ArgParser argParser) {
 void main(List<String> arguments) {  
   String address = '';
   String port = '';
+  bool secure = false;
   final ArgParser argParser = buildParser();
   try {
     final ArgResults results = argParser.parse(arguments);
@@ -40,10 +42,14 @@ void main(List<String> arguments) {
       print('arcon version: $version');
       return;
     }
+    if(results.flag('secure')) {
+      secure = true;
+    }
     address = results.option('address')??'';
-    port = results.option('port_or_baud')??'';
+    port = results.option('port_or_baud')??'';    
     print('option address: $address');
     print('option port_or_baud: $port');
+    print('option secure: $secure');
     // Act on the arguments provided.
     print('Positional arguments: ${results.rest}');
   } on FormatException catch (e) {
@@ -60,6 +66,6 @@ void main(List<String> arguments) {
   // TEST
   print('CWD: ${Directory.current}');
   print('Starting ARCON: $arguments');
-  ARCON(arguments.last, address:address, port:port);
+  ARCON(arguments.last, address:address, port:port, secure:secure);
   // END TEST
 }
