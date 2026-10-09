@@ -41,7 +41,7 @@ Usage: dart arcon.dart <flags> [arguments]
 -h, --help            Print this usage information.
     --version         Print the tool version.
 -s, --secure          The server will use TLS to cover incoming connections.
--a, --address         The radio TCP address or serial port name. e.g. `-a COM7`
--p, --port_or_baud    The radio TCP port or Serial baud rate. e.g. `-p 19200`
+-a, --address         The radio TCP address or serial port name. e.g. -a COM7
+-p, --port_or_baud    The radio TCP port or Serial baud rate. e.g. -p 19200
 
 ```
