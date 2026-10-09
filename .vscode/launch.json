@@ -4,7 +4,12 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.1.0",
     "configurations": [
-
+        {
+            "name": "arconhelp",
+            "type": "dart",
+            "request": "launch",
+            "program": "bin/arcon.dart","args": ["--help"]
+        },
         {
             "name": "arconkx3",
             "type": "dart",

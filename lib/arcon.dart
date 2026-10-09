@@ -96,15 +96,16 @@ class ARCON {
   Future<void> startARCONServer() async {
     // only one active connection to the radio (for now)
     // TEST
+    // currently coded to use only the localhost cert/chain/privkey below
     // bSecureClient = true;
     // END TEST
     if(bSecureClient) {
       var context = SecurityContext.defaultContext;
       context.minimumTlsProtocolVersion = TlsProtocolVersion.tls1_2;
-      context.setTrustedCertificates('/home/mitch/testca.pem');
-      context.useCertificateChain('/home/mitch/testcrt.pem');
-      context.usePrivateKey('/home/mitch/testprivkey.pem');
-      print(context.allowLegacyUnsafeRenegotiation = true);
+      context.setTrustedCertificates('localhost/localhostca.pem');
+      context.useCertificateChain('localhost/localhostcrt.pem');
+      context.usePrivateKey('localhost/localhostprivkey.pem');
+      // context.allowLegacyUnsafeRenegotiation = true;
       var server = await SecureServerSocket.bind(
         InternetAddress.anyIPv4,
         19791,
@@ -882,8 +883,13 @@ class ARCON {
     if (isTcp) {
       //print('send TCP command: ${String.fromCharCodes(cmd)}');
       // use add(), because write() converts to a String for some stupid reason.
-      socket.add(cmd.toList());
-      // socket.flush();
+      try {
+        socket.add(cmd.toList());
+      }
+      catch(e) {
+        getTcpRadio(radioAddress, radioTcpPortNumber);
+        Timer(Duration(seconds:1), (){ socket.add(cmd.toList()); });
+      }
     } 
     else {
       // serial
@@ -893,7 +899,7 @@ class ARCON {
         }
         catch(e) {
           getSerialRadio(radioAddress, serialBaudRate);
-          Timer(Duration(seconds:1), (){ sendRadioCommand(cmd); });
+          Timer(Duration(seconds:1), (){ serial.write(cmd); });
         }
     }    
   }
