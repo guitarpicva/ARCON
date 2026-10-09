@@ -893,6 +893,7 @@ class ARCON {
         }
         catch(e) {
           getSerialRadio(radioAddress, serialBaudRate);
+          Timer(Duration(seconds:1), (){ sendRadioCommand(cmd); });
         }
     }    
   }
