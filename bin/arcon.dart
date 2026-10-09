@@ -16,8 +16,8 @@ ArgParser buildParser() {
     )
     ..addFlag('version', negatable: false, help: 'Print the tool version.')
     ..addFlag('secure', negatable: false, help: 'Start the server in TLS mode.')
-    ..addOption('address', abbr: 'a', help: 'The radio TCP address or serial port name.')
-    ..addOption('port_or_baud', abbr: 'p', help: 'The radio TCP port or Serial baud rate.');
+    ..addOption('address', abbr: 'a', help: 'The radio TCP address or serial port name. e.g. -a COM7')
+    ..addOption('port_or_baud', abbr: 'p', help: 'The radio TCP port or Serial baud rate. e.g. -p 19200');
 }
 
 void printUsage(ArgParser argParser) {
