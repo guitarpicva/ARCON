@@ -42,4 +42,5 @@ Usage: dart arcon.dart <flags> [arguments]
     --version         Print the tool version.
 -a, --address         The radio TCP address or serial port name.
 -p, --port_or_baud    The radio TCP port or Serial baud rate.
+-s, --secure          The server will use TLS to cover incoming connections.
 ```
