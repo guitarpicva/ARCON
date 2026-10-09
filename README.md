@@ -36,9 +36,10 @@ After the dart build step, Dart will print the path to the created executable na
 Run the arcon program with a single required parameter of the chosen RSON file for the radio to be controlled.  Use the `-h` or `--help` switch to see the other command line paramaters available, such as the radio address value or the radio connection port number or serial baud rate value.  Other parameters may be added in the future.
 
 5. For command line help: `./arcon --help`
-
+```
 Usage: dart arcon.dart <flags> [arguments]
 -h, --help            Print this usage information.
     --version         Print the tool version.
 -a, --address         The radio TCP address or serial port name.
 -p, --port_or_baud    The radio TCP port or Serial baud rate.
+```
