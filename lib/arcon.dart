@@ -41,6 +41,7 @@ class ARCON {
   int serverListenPortNumber = 19791;
   int serialBaudRate = 19200;
   int txTail = 20;
+  int interCmdWait = 75;
   bool isTcp = false;
   bool bStartServer = true; // hard coded on for now
   bool bCmdDebug = false; // user can turn it on via the TCP client
@@ -371,7 +372,7 @@ class ARCON {
   /// in a row effectively.
   void sendCommands() {
     // send first command from cmdLines and remove first
-    Timer.periodic(Duration(milliseconds: 75), (t) {
+    Timer.periodic(Duration(milliseconds: interCmdWait), (t) {
       // print('cmd timer pop -- $cmdLines');
       if (cmdLines.isEmpty) {
         t.cancel();

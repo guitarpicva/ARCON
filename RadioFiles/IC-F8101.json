@@ -1,9 +1,9 @@
 {
-    "autoTune": "",
+    "autoTune": "FEFE8AE01C0102",
     "radioName":"IC-F8101",
     "controlType": "BINARY",
     "connectionMethod": "SERIAL",
-    "radioAddress": "ttyUSB2",
+    "radioAddress": "ttyUSB1",
     "serialBaudRate": 38400,
     "serialParams": "8N1",
     "serialFlowControl": "No Flow Control",
@@ -38,5 +38,16 @@
         "prefixA": "FEFE8AE01A35",
         "prefixB": "FEFE8AE01A35",
         "suffix": "FD"
-    }    
+    },
+    "queryCommands": {
+        "mode": "FEFE8AE01A34",
+        "modeResponsePrefix": "FEFEE08A1A34",
+        "vfo": "",
+        "vfoAFreq": "FEFE8AE003",
+        "vfoAFreqResponse": "FEFEE08A03",
+        "vfoAResponse": "",
+        "vfoBFreq": "FEFE8AE003",
+        "vfoBFreqResponse": "FEFEE08A03",
+        "vfoBResponse": ""
+    }   
 }

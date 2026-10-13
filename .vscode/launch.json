@@ -5,6 +5,15 @@
     "version": "0.1.0",
     "configurations": [
         {
+            "name": "arconF8101",
+            "type": "dart",
+            "request": "launch",
+            "program": "bin/arcon.dart",
+            "args": [
+                "RadioFiles/IC-F8101.json"
+            ]
+        },
+        {
             "name": "arconhelp",
             "type": "dart",
             "request": "launch",
