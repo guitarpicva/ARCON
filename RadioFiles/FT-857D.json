@@ -11,6 +11,7 @@
         "suffix": "01"
     },
     "initialSetup": "0000000088,0100000007,0000000085,0000000082",
+    "interCmdDelay": 75,
     "modeList": {
         "AM": "04ADBEEF07",
         "CW": "02ADBEEF07",

@@ -12,6 +12,7 @@
         "toVFOB": ""
     },
     "initialSetup": "FT0,MD6,AI0",
+    "interCmdDelay": 75,
     "modeList": {
         "AM": "MD5",
         "CW": "MD3",

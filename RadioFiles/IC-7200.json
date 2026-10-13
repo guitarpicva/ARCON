@@ -10,6 +10,7 @@
         "suffix": "FD"
     },
     "initialSetup": "FEFE76E00700,FEFE76E00601",
+    "interCmdDelay": 75,
     "modeList": {
         "AM": "FEFE76E0602",
         "CW": "FEFE76E0603",

@@ -12,6 +12,7 @@
         "toVFOB": "VS1"
     },
     "initialSetup": "VS0,MD0C,SH031,AI0",
+    "interCmdDelay": 75,
     "modeList": {
         "AM": "MD05",
         "CW": "MD03",

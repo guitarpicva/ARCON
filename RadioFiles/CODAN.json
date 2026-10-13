@@ -2,6 +2,7 @@
     "autoTune": "TUNE AUTO",
     "connectionMethod": "TCP",
     "initialSetup": "scan off,scan off,echo off,login admin ''",
+    "interCmdDelay": 75,
     "modeList": {
         "USB": "MODE USB",
         "LSB": "MODE LSB",

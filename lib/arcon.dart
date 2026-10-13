@@ -41,7 +41,7 @@ class ARCON {
   int serverListenPortNumber = 19791;
   int serialBaudRate = 19200;
   int txTail = 20;
-  int interCmdWait = 75;
+  int interCmdDelay = 75; // ms to wait between sending a list of commands to radio
   bool isTcp = false;
   bool bStartServer = true; // hard coded on for now
   bool bCmdDebug = false; // user can turn it on via the TCP client
@@ -372,7 +372,8 @@ class ARCON {
   /// in a row effectively.
   void sendCommands() {
     // send first command from cmdLines and remove first
-    Timer.periodic(Duration(milliseconds: interCmdWait), (t) {
+    // print('interCmdDelay: $interCmdDelay');
+    Timer.periodic(Duration(milliseconds: interCmdDelay), (t) {
       // print('cmd timer pop -- $cmdLines');
       if (cmdLines.isEmpty) {
         t.cancel();
@@ -441,7 +442,7 @@ class ARCON {
           setupLines.add(s);
         }
       }
-
+      interCmdDelay = int.tryParse(jsonMap['interCmdDelay'].toString()) ?? 75;
       pttOn = jsonMap['pttOn'].toString();
       pttOff = jsonMap['pttOff'].toString();
       pttData = jsonMap['pttData'].toString();

@@ -9,6 +9,7 @@
     "serialFlowControl": "No Flow Control",
     "radioTcpPortNumber": -1,
     "initialSetup": "FEFE8AE00700",
+    "interCmdDelay": 75,
     "pttOn": "FEFE8AE01A370001",
     "pttOff": "FEFE8AE01A370000",
     "pttData": "",

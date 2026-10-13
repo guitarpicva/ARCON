@@ -11,6 +11,7 @@
         "suffix": "FD"
     },
     "initialSetup": "FEFEA4E00700,FEFEA4E0010101,FEFEA4E01A060101",
+    "interCmdDelay": 75,
     "modeList": {
         "AM": "FEFEA4E0010201",
         "CW": "FEFEA4E0010302",
