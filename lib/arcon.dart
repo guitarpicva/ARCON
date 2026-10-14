@@ -909,36 +909,38 @@ class ARCON {
 
   // Frequency command builder utiility functions for CI-V
   String getCIVFreq(final String freqHz) {
-    final int idx = freqPrefixA.length;
-    final int endex = freqHz.indexOf(freqSuffix, idx);
-    final String outCIV = freqHz.substring(
-      idx,
-      endex - idx,
-    ); // FEFEE0A403 0005131000 FD == 10130500 Hz
+    // print('getCIVFreq: $freqHz');
+    final int idx = vfoAFreqResponse.length;
+
+    // FEFEE0A403 0005131000 FD == 10130500 Hz
+    final String outCIV = freqHz.substring(idx);
+    // print('outCIV: $outCIV -- freqLength: $freqLength');
     String out;
     switch (freqLength) {
       case 8:
         out =
-            outCIV.substring(6, 2) +
-            outCIV.substring(4, 2) +
-            outCIV.substring(2, 2) +
+            outCIV.substring(6, 8) +
+            outCIV.substring(4, 6) +
+            outCIV.substring(2, 4) +
             outCIV.substring(0, 2);
         break;
       case 10:
+      print('case 10:');
         out =
-            outCIV.substring(8, 2) +
-            outCIV.substring(6, 2) +
-            outCIV.substring(4, 2) +
-            outCIV.substring(2, 2) +
+            outCIV.substring(8, 10) +
+            outCIV.substring(6, 8) +
+            outCIV.substring(4, 6) +
+            outCIV.substring(2, 4) +
             outCIV.substring(0, 2);
+            // print('out: $out');
         break;
       case 12:
         out =
-            outCIV.substring(10, 2) +
-            outCIV.substring(8, 2) +
-            outCIV.substring(6, 2) +
-            outCIV.substring(4, 2) +
-            outCIV.substring(2, 2) +
+            outCIV.substring(10, 12) +
+            outCIV.substring(8, 10) +
+            outCIV.substring(6, 8) +
+            outCIV.substring(4, 6) +
+            outCIV.substring(2, 4) +
             outCIV.substring(0, 2);
         break;
       default:
