@@ -322,7 +322,7 @@ class ARCON {
         // print('debug: $bCmdDebug');
       }
       else if (cmd.startsWith('quit')) {
-        writeToClient('Closing ARCON Control Connection...$crlf'.codeUnits);
+        writeToClient('Closed ARCON Control Connection...$crlf'.codeUnits);
         if(bSecureClient) { sclient.destroy(); }
         else { client.destroy(); }
       }
@@ -360,6 +360,7 @@ class ARCON {
       out = modeQuery;
       print('mode query: $out');
     }
+    else { return; } // un-recognized query command
     for (String line in out.split(',')) {
       cmdLines.add('$line$freqSuffix');
     }
@@ -386,6 +387,11 @@ class ARCON {
         sendRadioCommand(cmd);
       } 
       else { // CI-V or BCD which are binary so translate
+        if(cmdLines[0].length % 2 > 0) {
+          // bad format for hex encoded string, so drop      
+          cmdLines.removeAt(0);
+          return;
+        }
         var fromhex = hex.decode(cmdLines[0]);
         var cmd = Uint8List.fromList(fromhex);
         sendRadioCommand(cmd);
@@ -911,7 +917,6 @@ class ARCON {
   String getCIVFreq(final String freqHz) {
     // print('getCIVFreq: $freqHz');
     final int idx = vfoAFreqResponse.length;
-
     // FEFEE0A403 0005131000 FD == 10130500 Hz
     final String outCIV = freqHz.substring(idx);
     // print('outCIV: $outCIV -- freqLength: $freqLength');
