@@ -4,7 +4,7 @@ Using a more MVVM approach to radio control [by creating each radio's model usin
 
 See also [RSON](https://github.com/guitarpicva/RSON.git) and [RadioFiles](https://github.com/guitarpicva/RadioFiles) repos.
 
-Starting the program from the command line currently requires the LAST parameter be the path to the RSON radio json file to load.  For the reference implementation, ensure that the RSON file is correct for mainly the serial port data.  Further work on extending the command line parameters to include serial port/ip address and baud rate/port number will be in the next iteration.
+Starting the program from the command line currently requires the LAST parameter be the path to the RSON radio json file to load.  For the reference implementation, ensure that the RSON file is correct for mainly the serial port data.  Command line parameters also include serial port/ip address and baud rate/port number will be in the next iteration.  The --secure flag is a work in progress and only has key and certs for localhost at this time (2026-10-14).
 
 ## Building ARCON
 Dart language dependency for building ARCON is *min version of 3.12.2* for the Dart SDK.
