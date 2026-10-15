@@ -46,6 +46,7 @@ class ARCON {
   bool bStartServer = true; // hard coded on for now
   bool bCmdDebug = false; // user can turn it on via the TCP client
   bool bClientConnected = false; // when a TCP control client is connected, true
+  bool bCurrVfoA = true; // is the current VFO a (true) or b (false)
   /// [bSecureClient]. If true, use a TLS SecureServerSocket instead of
   /// a std ServerSocket -- TLS CONNECTIVITY NOT YET FUNCTIONAL
   bool bSecureClient = false;
@@ -215,6 +216,7 @@ class ARCON {
   /// When the user sends an action command, perform the appropriate things
   /// at the radio device to satisfy that action.
   void handleClientCommands(final List<String> cmds) {
+    cmds.removeWhere((item) => item.trim().isEmpty);
     for (String cmd in cmds) {
       print('handleClientCommands: $cmd');
       if (cmd.startsWith("?")) {
@@ -356,17 +358,21 @@ class ARCON {
     } 
     else if (cmd.startsWith("vfo")) {
       out = vfoQuery;
+      if(out.isEmpty) {
+        writeToClient(bCurrVfoA ? "vfoa\n".codeUnits : "vfob\n".codeUnits);
+        return; // if radio with no a/b, we're done based on tracked vfoa/b bool
+      }
     } 
     else if (cmd.startsWith("mode")) {
       out = modeQuery;
-      print('mode query: $out');
+      // print('mode query: $out');
     }
     else { return; } // un-recognized query command
     for (String line in out.split(',')) {
       cmdLines.add('$line$freqSuffix');
     }
     sendCommands();
-    print('queryCommands: $cmdLines ${cmdLines.length}');    
+    // print('queryCommands: $cmdLines ${cmdLines.length}');    
   }
 
   /// A [List<String>] of commands, [cmdList] is cycled through with an 
@@ -632,6 +638,7 @@ class ARCON {
     for (String line in toVFOA.split(',')) {
       cmdLines.add('$line$freqSuffix');
     }
+    bCurrVfoA = true;
     sendCommands();
   }
   
@@ -640,6 +647,7 @@ class ARCON {
     for (String line in toVFOB.split(',')) {
       cmdLines.add('$line$freqSuffix');
     }
+    bCurrVfoA = false;
     sendCommands();
   }
 
