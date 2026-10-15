@@ -4,12 +4,15 @@ Basic functionality is to accommodate use by existing software programs in a sim
 
 The addition of other functionality will extend the usefulness of ARCON using a more industry standard method.
 
+## Current Activites in Progress
+
+* Add TLS Connectivity -- largely done and tested with "localhost" certs/key which is in the repo.  Cert/Key activities need a repeatable process to help users to do this easily, whithout a lot of pain and anquish.  I believe in Linux this is rather simple with a shell script, but in Windows that's another story.
+
+* Started the addition of "user_commands": {[]} section of the RSON files.  User Commands should allow users to create custom command names for integration into other software or for their own personal convenience.  Intent is to add a tab in the RSON UI application to add individual user commands to the RSON file, and a way to print them out for viewing the list.  Open question is whether to make it a more complex command set, like the existing query commands, or simply a way to send command lists.  It is rare for properly formatted commands to fail, so at least for the initial extension activity, there will be only a way to store a command list by name.
+
 ## Upcoming Features in Plan
 
-
-* Add TLS Connectivity
-
-* Control of commercial radios
+* Decide on How to do Control of Commercial Radios
 
 This may require a fork due to various idiosyncracies of commercial radio firmware.  Every manufacturer is potentially completely different.  This would be a more "Hamlib" sort of solution but since the list is somewhat short, not out of the realm of possiblilty.  CURRENTLY: CODAN radios have basic functionality, as well as the ICOM IC-F8101E using the current ARCON system.
 
