@@ -824,8 +824,7 @@ class ARCON {
           // print('dataIn: got vfob');
           writeToClient('vfob$crlf'.codeUnits);
         } 
-        else if (modeResponsePrefix.isNotEmpty &&
-            ind.startsWith(modeResponsePrefix)) {
+        else if (modeResponsePrefix.isNotEmpty && ind.startsWith(modeResponsePrefix)) {
           // by looking up against the modeList values
           // print('dataIn: got mode $ind');
           if (freqType == "CAT") {
@@ -863,7 +862,7 @@ class ARCON {
             }
           }
         } 
-        else if (ind.startsWith(vfoAFreqResponse)) {
+        else if (bCurrVfoA && ind.startsWith(vfoAFreqResponse)) {
           // print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
              writeToClient(
@@ -877,7 +876,7 @@ class ARCON {
             writeToClient('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
           }
         } 
-        else if (ind.startsWith(vfoBFreqResponse)) {
+        else if (!bCurrVfoA && ind.startsWith(vfoBFreqResponse)) {
           // print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
             writeToClient(
@@ -886,7 +885,7 @@ class ARCON {
           } 
           else if (freqType == "CI-V") {
             // const int lenny = freqPrefixA.length();
-            writeToClient('vfob ${getCIVFreq(ind)}$crlf)'.codeUnits);
+            writeToClient('vfob ${getCIVFreq(ind)}$crlf'.codeUnits);
           } 
           else if (freqType == "BCD") {
             writeToClient('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
@@ -1061,6 +1060,11 @@ class ARCON {
     }
     return '$out$suffix';
   }
+
+// TODO The following are functions intended to be setters for private variables
+// but currently, all instance variables are public.  THIS MAY CHANGE, in which
+// case all/most instance variables will become private.  So there will also
+// be many more setters coming as well.
 
   /// Serial port name or IP address if TCP
   void setRadioAddress(final String address) {
