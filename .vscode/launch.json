@@ -34,7 +34,7 @@
             "type": "dart",
             "program": "./bin/arcon.dart",
             "args": [
-                "--secure", "RadioFiles/FT-450D.json"
+                "RadioFiles/FT-450D.json"
             ]
         },
         {

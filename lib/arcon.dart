@@ -330,10 +330,10 @@ class ARCON {
         else { client.destroy(); }
       }
       else if(bCmdDebug) {
-        print('debug on: send command: $cmd');
-        print('debug cmd: $cmd$freqSuffix');
+        print('debug on: send raw command: ${cmd.codeUnits}');
+        // print('debug cmd: $cmd$freqSuffix');
         if(cmd.trim().isNotEmpty) {
-          cmdLines.add('$cmd$freqSuffix');
+          cmdLines.add('${cmd.trim()}$freqSuffix');
           sendCommands();
         }
       }
@@ -351,7 +351,7 @@ class ARCON {
     }
     out = cmd.toUpperCase();
     if (cmd.startsWith("vfoa")) {
-      out = vfoAFreq;
+      out = vfoAFreq; print('vfoAFreq: $vfoAFreq');
     } 
     else if (cmd.startsWith("vfob")) {
       out = vfoBFreq;
@@ -382,14 +382,14 @@ class ARCON {
     // send first command from cmdLines and remove first
     // print('interCmdDelay: $interCmdDelay');
     Timer.periodic(Duration(milliseconds: interCmdDelay), (t) {
-      // print('cmd timer pop -- $cmdLines');
+      print('cmd timer pop -- $cmdLines');
       if (cmdLines.isEmpty) {
         t.cancel();
         return;
       }
       if (freqType == "CAT") { // ASCII commands as is
         var cmd = Uint8List.fromList(cmdLines[0].codeUnits);
-        print('sendCommands: cat command -- ${cmdLines[0]}');
+        print('sendCommands: cat command -- $cmd');
         // print(cmd); // to check for freqSuffix on the end
         sendRadioCommand(cmd);
       } 
@@ -817,6 +817,7 @@ class ARCON {
         }
       }
       if (bClientConnected) {
+        print('ind: $ind - bCurrVfoA: $bCurrVfoA - vfoAFreqResponse: $vfoAFreqResponse - vfoBFreqResponse: $vfoBFreqResponse');
         if (vfoAResponse.isNotEmpty && ind.startsWith(vfoAResponse)) {
           writeToClient('vfoa$crlf'.codeUnits);
         } 
@@ -862,7 +863,7 @@ class ARCON {
             }
           }
         } 
-        else if (bCurrVfoA && ind.startsWith(vfoAFreqResponse)) {
+        else if (ind.startsWith(vfoAFreqResponse)) {
           // print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
              writeToClient(
@@ -870,13 +871,18 @@ class ARCON {
           } 
           else if (freqType == "CI-V") {
             // const int lenny = freqPrefixA.length();
-            client.add('vfoa ${getCIVFreq(ind)}$crlf'.codeUnits);
+            if(bCurrVfoA) {
+              writeToClient('vfoa ${getCIVFreq(ind)}$crlf'.codeUnits);
+            }
+            else {
+              writeToClient('vfob ${getCIVFreq(ind)}$crlf'.codeUnits);
+            }
           } 
           else if (freqType == "BCD") {
             writeToClient('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
           }
         } 
-        else if (!bCurrVfoA && ind.startsWith(vfoBFreqResponse)) {
+        else if (ind.startsWith(vfoBFreqResponse)) {
           // print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
             writeToClient(
@@ -884,8 +890,12 @@ class ARCON {
             );
           } 
           else if (freqType == "CI-V") {
-            // const int lenny = freqPrefixA.length();
-            writeToClient('vfob ${getCIVFreq(ind)}$crlf'.codeUnits);
+            if(bCurrVfoA ) {
+              writeToClient('vfoa ${getCIVFreq(ind)}$crlf'.codeUnits);
+            }
+            else {
+              writeToClient('vfob ${getCIVFreq(ind)}$crlf'.codeUnits);
+            }
           } 
           else if (freqType == "BCD") {
             writeToClient('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
@@ -915,13 +925,15 @@ class ARCON {
     else {
       // serial
       //print('send serial command ${hex.encode(cmd)} -- ${String.fromCharCodes(cmd)}');
-        try {serial.write(cmd);
-          serial.drain();
-        }
-        catch(e) {
-          getSerialRadio(radioAddress, serialBaudRate);
-          Timer(Duration(seconds:1), (){ serial.write(cmd); });
-        }
+      try {
+        serial.write(cmd);
+        serial.drain();
+      }
+      catch(e) {
+        // try to reconnect and then send the same command 1 second later
+        getSerialRadio(radioAddress, serialBaudRate);
+        Timer(Duration(seconds:1), (){ serial.write(cmd); });
+      }
     }    
   }
 

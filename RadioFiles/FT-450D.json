@@ -38,7 +38,7 @@
         "vfoBFreqResponse": "FB",
         "vfoBResponse": "VS1"
     },
-    "radioAddress": "ttyUSB0",
+    "radioAddress": "ttyUSB2",
     "radioName": "FT-450D",
     "serialBaudRate": 38400,
     "serialFlowControl": "No Flow Control",
