@@ -220,6 +220,7 @@ class ARCON {
       if (cmd.startsWith("?")) {
         // send to the query handler
         queryCmd(cmd.substring(1));
+        continue;
       }
       if (cmd.startsWith("ptton")) {
         sendPttOn();
@@ -787,7 +788,7 @@ class ARCON {
     // print('show radio in bytes: $inds');
     indata = indata.substring(indata.lastIndexOf(freqSuffix) + freqSuffix.length);
     for (String ind in inds) {
-      print('onRadioDataIn: ind: $ind');
+      // print('onRadioDataIn: ind: $ind');
       // Check the CI-V commands for ack/nack to discard them
       if (freqType == "CI-V") {
         if (ind.endsWith('FB')) {
@@ -812,18 +813,18 @@ class ARCON {
           writeToClient('vfoa$crlf'.codeUnits);
         } 
         else if (vfoBResponse.isNotEmpty && ind.startsWith(vfoBResponse)) {
-          print('dataIn: got vfob');
+          // print('dataIn: got vfob');
           writeToClient('vfob$crlf'.codeUnits);
         } 
         else if (modeResponsePrefix.isNotEmpty &&
             ind.startsWith(modeResponsePrefix)) {
           // by looking up against the modeList values
-          print('dataIn: got mode $ind');
+          // print('dataIn: got mode $ind');
           if (freqType == "CAT") {
             for (String mode in modeList.keys) {
-              print('dataIn: CAT modeList mode: $mode');
+              // print('dataIn: CAT modeList mode: $mode');
               if (modeList[mode] == ind) {
-                print('found CAT mode: $mode');
+                // print('found CAT mode: $mode');
                 writeToClient('mode $mode$crlf'.codeUnits);  
                 break;
               }
@@ -834,14 +835,14 @@ class ARCON {
             for (String pre in prefixes) {
               if (ind.startsWith(pre)) {
                 // print('dataIn: CI-V cmd match: $ind');
-                print('modeList: $modeList');
+                // print('modeList: $modeList');
                 for (String civmode in modeList.values) {
                   if(civmode.isEmpty) { continue; }
                   final String mode = civmode.substring(modeResponsePrefix.length);                
-                  print('dataIn: civ mode: $mode cmd: $ind - ${ind.endsWith(mode)}');
+                  // print('dataIn: civ mode: $mode cmd: $ind - ${ind.endsWith(mode)}');
                   if (ind.endsWith(mode)) {
                     for(String match in modeList.keys) {
-                      print('match: $match');
+                      // print('match: $match');
                       var modematch = modeList[match];
                       if(modematch != null && modematch.endsWith(mode)) {
                         writeToClient('mode $match$crlf'.codeUnits);
@@ -855,27 +856,31 @@ class ARCON {
           }
         } 
         else if (ind.startsWith(vfoAFreqResponse)) {
-          print('dataIn: vfoa freq response: $ind');
+          // print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
              writeToClient(
               'vfoa ${ind.substring(freqPrefixA.length)}$crlf'.codeUnits);
-          } else if (freqType == "CI-V") {
+          } 
+          else if (freqType == "CI-V") {
             // const int lenny = freqPrefixA.length();
             client.add('vfoa ${getCIVFreq(ind)}$crlf'.codeUnits);
-          } else if (freqType == "BCD") {
+          } 
+          else if (freqType == "BCD") {
             writeToClient('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
           }
         } 
         else if (ind.startsWith(vfoBFreqResponse)) {
-          print('dataIn: vfoa freq response: $ind');
+          // print('dataIn: vfoa freq response: $ind');
           if (freqType == "CAT") {
             writeToClient(
               'vfob ${ind.substring(freqPrefixB.length)}$crlf'.codeUnits,
             );
-          } else if (freqType == "CI-V") {
+          } 
+          else if (freqType == "CI-V") {
             // const int lenny = freqPrefixA.length();
             writeToClient('vfob ${getCIVFreq(ind)}$crlf)'.codeUnits);
-          } else if (freqType == "BCD") {
+          } 
+          else if (freqType == "BCD") {
             writeToClient('vfob ${getBCDFreq(ind)}$crlf'.codeUnits);
           }
         }
@@ -930,7 +935,6 @@ class ARCON {
             outCIV.substring(0, 2);
         break;
       case 10:
-      print('case 10:');
         out =
             outCIV.substring(8, 10) +
             outCIV.substring(6, 8) +
