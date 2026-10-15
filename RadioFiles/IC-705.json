@@ -45,5 +45,6 @@
     "toggleSplit": "",
     "toVFOA": "FEFEA4E00700",
     "toVFOB": "FEFEA4E00701",
-    "txTail": 20
+    "txTail": 20,
+    "userCommands": []
 }

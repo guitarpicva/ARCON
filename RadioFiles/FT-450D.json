@@ -49,5 +49,6 @@
     "radioTcpPortNumber": 9873,
     "toVFOA": "VS0",
     "toVFOB": "VS1",
-    "txTail": 20
+    "txTail": 20,
+    "userCommands": []
 }

@@ -42,5 +42,6 @@
     "serialFlowControl": "No Flow Control",
     "serialParams": "8N1",
     "tcpPortNumber": 23,
-    "txTail": 20
+    "txTail": 20,
+    "userCommands": []
 }

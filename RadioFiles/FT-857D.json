@@ -43,5 +43,6 @@
     "serialFlowControl": "No Flow Control",
     "serialParams": "8N1",
     "radioTcpPortNumber": 9873,
-    "txTail": 20
+    "txTail": 20,
+    "userCommands": []
 }
