@@ -6,6 +6,7 @@ import 'package:convert/convert.dart';
 import 'package:libserialport/libserialport.dart';
 
 class ARCON {
+  String version = '0.1.1';
   String freqPrefixA = '';
   String freqPrefixB = '';
   String freqSuffix = '';
@@ -34,7 +35,12 @@ class ARCON {
   String vfoAFreqResponse = ''; // expected respoinse for VFO A frequency query
   String vfoBFreqResponse = ''; // expected respoinse for VFO B frequency query
   String modeResponsePrefix = ''; // expected prefix of mode query reply // MDO for test only
-  Map<String, String> modeList = <String, String>{}; // list of modes defined for this radio
+  /// [modeList] is a Map of modes defined for this radio.  Users may add modes
+  /// to the list with custom names for special use purposes.
+  Map<String, String> modeList = <String, String>{}; 
+  /// [userCommands] is a Map of key = command name and value = actual command to send
+  /// for user or community created commands.
+  Map<String, String> userCommands = <String, String>{}; // list of user created commands
   final String crlf = '\r\n';
   int freqLength = 10; // most common value
   int radioTcpPortNumber = 23;
@@ -119,7 +125,7 @@ class ARCON {
       );
       server.listen((client) {
         newSecureConnection(client);
-        client.write('\x1b[31mTLS: Welcome to ARCON at TLS ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf\x1b[0m');
+        client.write('\x1b[31mTLS: Welcome to ARCON $version at TLS ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf\x1b[0m');
       },
       onError:((e) {print(e);}),
       );
@@ -133,7 +139,7 @@ class ARCON {
       );
       server.listen((client) {
         newConnection(client);
-        client.write('\x1b[35mWelcome to ARCON at ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf\x1b[0m');
+        client.write('\x1b[35mWelcome to ARCON $version at ${client.remoteAddress.address}:${client.port}${crlf}Radio File: $radioFile$crlf\x1b[0m');
       },
       onDone:()=>print('server socket done...'),
       onError:(e) {
@@ -294,7 +300,10 @@ class ARCON {
       }
       else if (cmd.startsWith("help")) {
         writeToClient(clientHelpText.codeUnits);
-      } 
+      }
+      else if (cmd.startsWith("user ")) {
+        processUserCommand(cmd.split(' ')[1].trim());
+      }
       else if (cmd.startsWith("radiofile")) {
         List<String> parts = cmd.trim().split(' ');
         if(parts.length > 1) {
@@ -324,6 +333,9 @@ class ARCON {
         }
         // print('debug: $bCmdDebug');
       }
+      else if (cmd.startsWith("version")) {
+        writeToClient('ARCON version: $version\n'.codeUnits);
+      }
       else if (cmd.startsWith('quit')) {
         writeToClient('Closed ARCON Control Connection...$crlf'.codeUnits);
         if(bSecureClient) { sclient.destroy(); }
@@ -337,6 +349,24 @@ class ARCON {
           sendCommands();
         }
       }
+    }
+  }
+
+  /// User commands are looked up and processed here.
+  /// the userCommand array has been sent to a SplayTreeMap sorted on command
+  /// name key.
+  void processUserCommand(String cmd) {
+    // send the command(s) represented by this user command name
+    // print('processUserCommand: $cmd');
+    // print('userCommands: $userCommands');
+    if(userCommands.containsKey(cmd)) {
+      var val = userCommands[cmd];
+      // print('val: $val');
+      for (var v in val!.split(',')) {
+        print('v: $v');
+        cmdLines.add('$v$freqSuffix');
+      }
+      sendCommands();
     }
   }
 
@@ -389,7 +419,7 @@ class ARCON {
       }
       if (freqType == "CAT") { // ASCII commands as is
         var cmd = Uint8List.fromList(cmdLines[0].codeUnits);
-        print('sendCommands: cat command -- $cmd');
+        print('sendCommands: cat command -- ${cmdLines[0]}');
         // print(cmd); // to check for freqSuffix on the end
         sendRadioCommand(cmd);
       } 
@@ -494,6 +524,15 @@ class ARCON {
         vfoAFreq = queryValues['vfoAFreq'].toString();
         vfoBFreq = queryValues['vfoBFreq'].toString();
       }
+      var usercmds = jsonMap['userCommands'] as List;
+      userCommands.clear();
+      for (var i = 0; i<usercmds.length; ++i) {
+        // print('usercmds[$i]: ${usercmds[i]}');
+        var ucmdmap = usercmds[i];
+        print('ucmdmap: $ucmdmap');
+        userCommands[ucmdmap.keys.first] = ucmdmap[ucmdmap.keys.first];
+      }
+      print('userCommands: $userCommands');
       //     // may wish to add ad-hoc mode list here later, from a new
       //     // section of the JSON maybe called userModeList {}
       // print('Radio Name:$radioName');

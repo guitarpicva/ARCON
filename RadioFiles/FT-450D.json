@@ -38,7 +38,7 @@
         "vfoBFreqResponse": "FB",
         "vfoBResponse": "VS1"
     },
-    "radioAddress": "ttyUSB2",
+    "radioAddress": "ft450d",
     "radioName": "FT-450D",
     "serialBaudRate": 38400,
     "serialFlowControl": "No Flow Control",
@@ -50,5 +50,12 @@
     "toVFOA": "VS0",
     "toVFOB": "VS1",
     "txTail": 20,
-    "userCommands": []
+    "userCommands": [
+        {"spoton":"CS1"},
+        {"spotoff":"CS0"},
+        {"mute": "AG0000"},
+        {"voll": "AG0010"},
+        {"volm": "AG0020"},
+        {"volh": "AG0030"}
+    ]
 }
