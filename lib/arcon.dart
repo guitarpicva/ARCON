@@ -4,6 +4,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:libserialport/libserialport.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_web_socket/shelf_web_socket.dart';
 
 class ARCON {
   String version = '0.1.1';
@@ -50,6 +52,7 @@ class ARCON {
   int interCmdDelay = 75; // ms to wait between sending a list of commands to radio
   bool isTcp = false;
   bool bStartServer = true; // hard coded on for now
+  bool bStartWebsocketServer = false; // def. do not start websocket server
   bool bCmdDebug = false; // user can turn it on via the TCP client
   bool bClientConnected = false; // when a TCP control client is connected, true
   bool bCurrVfoA = true; // is the current VFO a (true) or b (false)
@@ -60,17 +63,20 @@ class ARCON {
   late Socket socket; // possible TCP control connection to radio
   late SecureSocket sclient; // TLS covered client connection
   late Socket client; // TCP connection to arcon server
+  late StreamSink wsClientStreamSink; // WebSocket sink for sending back
   List<int> clientBytes = <int>[];
   // List<int> inbytes = <int>[]; // no longer used
   List<String> cmdLines = <String>[];
   List<String> setupLines = <String>[];
+
   final String clientHelpText = 'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nquit\n\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
   
-  ARCON(String radioFilename, {bool startServer = true, int serverPortNumber = 19791, String address = '', String port = '', bool secure = false}) 
+  ARCON(String radioFilename, {bool startServer = true, bool websocket = false, int serverPortNumber = 19791, String address = '', String port = '', bool secure = false}) 
   {
     print('RadioFile: $radioFilename');
     radioFile = radioFilename;
     bStartServer = startServer;
+    bStartWebsocketServer = websocket;
     bSecureClient = secure;
     serverListenPortNumber = serverPortNumber;
 
@@ -96,6 +102,9 @@ class ARCON {
     // server do so now.
     if (bStartServer) {      
       startARCONServer();
+    }
+    if(bStartWebsocketServer) {
+      startWebsocketServer();
     }
   }
 
@@ -148,14 +157,36 @@ class ARCON {
     }
   }
 
+  Future<void> startWebsocketServer() async {
+    var wsHandler = webSocketHandler((webSocket, _) {
+      wsClientStreamSink = webSocket.sink;
+      print('wsClientStreamSink: $wsClientStreamSink');
+      webSocket.stream.listen((message) {
+        //webSocket.sink.add('echo $message');
+        print('message: $message');
+        handleClientCommands(<String> [message]);
+      });
+    });
+
+    shelf_io.serve(wsHandler, 'localhost', 19792).then((server) {
+      print('Serving at ws://${server.address.host}:${server.port}');
+    });
+  }
+
   void writeToClient(List<int> data) {
     if(bSecureClient) {
       sclient.add(data);
       // sclient.flush();
     }
     else {
-      client.add(data);
-      // client.flush();
+      if(bStartServer) {
+        try { client.add(data); }
+        catch(e) {print('TCP socket send error: $e'); }
+      }
+      if(bStartWebsocketServer) {
+        try { wsClientStreamSink.add(data); }
+        catch(e){print('websocket send error:  $e'); }
+      }
     }
   }
 
@@ -398,6 +429,7 @@ class ARCON {
       // print('mode query: $out');
     }
     else { return; } // un-recognized query command
+    // load the command(s) and send them
     for (String line in out.split(',')) {
       cmdLines.add('$line$freqSuffix');
     }
@@ -830,6 +862,7 @@ class ARCON {
       indata += hex.encode(data).toUpperCase();
     }
     print('onRadioDataIn: indata: $indata');
+    writeToClient(indata.codeUnits);
     if(!indata.contains(freqSuffix)) { return; } // to get more
     List<String> inds = indata.split((freqType == "CI-V") ? "FD" : freqSuffix);
     // print('show radio in bytes: $inds');
@@ -941,6 +974,10 @@ class ARCON {
           }
         }
       }
+    }
+    if(bStartWebsocketServer) {
+      // send the response text to the websocket client
+      writeToClient(data);
     }
   }
 

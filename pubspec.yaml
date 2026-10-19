@@ -11,6 +11,7 @@ dependencies:
   args: ^2.7.0
   convert: ^3.1.2
   libserialport: ^0.3.0+1
+  shelf_web_socket: ^3.0.0
 
 dev_dependencies:
   lints: ^6.0.0
