@@ -1,0 +1,55 @@
+{
+    "autoTune": "FEFE8AE01C0102",
+    "connectionMethod": "SERIAL",
+    "frequencyControl": {
+        "numDigits": 10,
+        "order": "CI-V",
+        "prefixA": "FEFE8AE01A35",
+        "prefixB": "FEFE8AE01A35",
+        "suffix": "FD"
+    },
+    "initialSetup": "FEFE8AE00700",
+    "interCmdDelay": 75,
+    "modeList": {
+        "AM": "FEFE8AE01A360002",
+        "CW": "FEFE8AE01A360003",
+        "DATA1": "FEFE8AE01A360019",
+        "DATA2": "FEFE8AE01A360021",
+        "DATA3": "FEFE8AE01A360023",
+        "LSB": "FEFE8AE01A360000",
+        "RTTY": "FEFE8AE01A360004",
+        "USB": "FEFE8AE01A360001"
+    },
+    "pttData": "FEFE8AE01A370002",
+    "pttOff": "FEFE8AE01A370000",
+    "pttOn": "FEFE8AE01A370001",
+    "queryCommands": {
+        "mode": "FEFE8AE01A34",
+        "modeResponsePrefix": "FEFEE08A1A34",
+        "vfo": "",
+        "vfoAFreq": "FEFE8AE003",
+        "vfoAFreqResponse": "FEFEE08A03",
+        "vfoAResponse": "",
+        "vfoBFreq": "FEFE8AE003",
+        "vfoBFreqResponse": "FEFEE08A03",
+<<<<<<< HEAD
+        "vfoBResponse": ""
+    },
+    "radioAddress": "ttyUSB1",
+    "radioName": "IC-F8101",
+    "radioTcpPortNumber": 0,
+    "serialBaudRate": 38400,
+    "serialFlowControl": "No Flow Control",
+    "serialParams": "8N1",
+    "toVFOA": "FEFE8AE00700",
+    "toVFOB": "FEFE8AE00701",
+    "toggleSplit": "",
+    "txTail": 20,
+    "userCommands": []
+}
+=======
+        "vfoBResponse": "",
+    "userCommands": []
+    }   
+}
+>>>>>>> 0510ff0 (adjust for websockets)

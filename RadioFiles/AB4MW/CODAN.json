@@ -40,5 +40,6 @@
         "prefixA": "connect tcvr rf",
         "prefixB": "connect tcvr rf",
         "suffix": "\r"
-    }
+    },
+    "userCommands": []
 }
