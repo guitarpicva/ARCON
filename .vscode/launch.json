@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "bin/arcon.dart",
             "args": [
-                "RadioFiles/IC-F8101.json"
+                "RadioFiles/AB4MW/IC-F8101.json"
             ]
         },
         {
@@ -25,7 +25,7 @@
             "request": "launch",
             "program": "bin/arcon.dart",
             "args": [
-                "RadioFiles/KX-3.json"
+                "RadioFiles/AB4MW/KX-3.json"
             ]
         },
         {
@@ -34,7 +34,7 @@
             "type": "dart",
             "program": "./bin/arcon.dart",
             "args": [
-                "--websocket", "RadioFiles/FT-450D.json"
+                "--websocket", "RadioFiles/AB4MW/FT-450D.json"
             ]
         },
         {
@@ -52,7 +52,7 @@
             "type": "dart",
             "program": "./bin/arcon.dart",
             "args": [
-                "RadioFiles/CODAN.json"
+                "RadioFiles/AB4MW/CODAN.json"
             ]
         }
 

@@ -50,9 +50,6 @@
     "toVFOA": "VS0",
     "toVFOB": "VS1",
     "txTail": 20,
-<<<<<<< HEAD
-    "userCommands": []
-=======
     "userCommands": [
         {"spoton":"CS1"},
         {"spotoff":"CS0"},
@@ -61,5 +58,4 @@
         {"volm": "AG0020"},
         {"volh": "AG0030"}
     ]
->>>>>>> 0510ff0 (adjust for websockets)
 }
