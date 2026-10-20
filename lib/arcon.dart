@@ -51,7 +51,7 @@ class ARCON {
   int txTail = 20;
   int interCmdDelay = 75; // ms to wait between sending a list of commands to radio
   bool isTcp = false;
-  bool bStartServer = true; // hard coded on for now
+  bool bStartTcpServer = true; // hard coded on for now
   bool bStartWebsocketServer = false; // def. do not start websocket server
   bool bCmdDebug = false; // user can turn it on via the TCP client
   bool bClientConnected = false; // when a TCP control client is connected, true
@@ -71,11 +71,11 @@ class ARCON {
 
   final String clientHelpText = 'ARCON Client Help\n\nCommand List:\nptton\npttoff\npttdata\nvfoafreq\nvfobfreq\nspliton\nsplitoff\ntovfoa\ntovfob\nautotune\nquit\n\nQuery Commands:\n?mode\n?vfo\n?vfoa\n?vfob\n';
   
-  ARCON(String radioFilename, {bool startServer = true, bool websocket = false, int serverPortNumber = 19791, String address = '', String port = '', bool secure = false}) 
+  ARCON(String radioFilename, {bool tcpServer = true, bool websocket = false, int serverPortNumber = 19791, String address = '', String port = '', bool secure = false}) 
   {
     print('RadioFile: $radioFilename');
     radioFile = radioFilename;
-    bStartServer = startServer;
+    bStartTcpServer = tcpServer;
     bStartWebsocketServer = websocket;
     bSecureClient = secure;
     serverListenPortNumber = serverPortNumber;
@@ -100,7 +100,7 @@ class ARCON {
     startControlConnection();
     // if we wish to start the control TCP
     // server do so now.
-    if (bStartServer) {      
+    if (bStartTcpServer) {      
       startARCONServer();
     }
     if(bStartWebsocketServer) {
@@ -174,7 +174,7 @@ class ARCON {
   }
 
   void writeToClient(List<int> data) {        
-    if(bStartServer) {
+    if(bStartTcpServer) {
       if(bSecureClient) {
         try { sclient.add(data); }
         catch(e) {print('TLS socket send error: $e'); }
@@ -888,7 +888,7 @@ class ARCON {
           writeToClient('$ind$crlf'.codeUnits);
         }
       }
-      if (bStartServer || bStartWebsocketServer) {
+      if (bStartTcpServer || bStartWebsocketServer) {
         //print('ind: $ind - bCurrVfoA: $bCurrVfoA - vfoAFreqResponse: $vfoAFreqResponse - vfoBFreqResponse: $vfoBFreqResponse');
         if (vfoAResponse.isNotEmpty && ind.startsWith(vfoAResponse)) {
           writeToClient('vfoa$crlf'.codeUnits);
@@ -975,10 +975,6 @@ class ARCON {
         }
       }
     }
-    // if(bStartWebsocketServer) {
-    //   // send the response text to the websocket client
-    //   writeToClient(data);
-    // }
   }
 
   /// Send a single radio command to the radio device either via serial port

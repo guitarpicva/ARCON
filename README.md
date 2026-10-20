@@ -38,10 +38,12 @@ Run the arcon program with a single required parameter of the chosen RSON file f
 5. For command line help: `./arcon --help`
 ```
 Usage: dart arcon.dart <flags> [arguments]
--h, --help            Print this usage information.
-    --version         Print the tool version.
--s, --secure          The server will use TLS to cover incoming connections.
--a, --address         The radio TCP address or serial port name. e.g. -a COM7
--p, --port_or_baud    The radio TCP port or Serial baud rate. e.g. -p 19200
+-h, --help         Print this usage information.
+    --version      Print the tool version.
+-s, --secure       The server will use TLS to cover incoming connections. def. false
+-t, --tcpserver    The server will use TCP in the clear to cover incoming connections. def. false
+-w --websocket     The server will listen as a web socket server (clear). def. false
+-a, --address      The radio TCP address or serial port name. e.g. -a COM7 def. 127.0.0.1
+-p, --port_or_baud The radio TCP port or Serial baud rate. e.g. -p 19200 def. 19791
 
 ```

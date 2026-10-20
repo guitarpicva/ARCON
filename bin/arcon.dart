@@ -15,9 +15,9 @@ ArgParser buildParser() {
       help: 'Print this usage information.',
     )
     ..addFlag('version', negatable: false, abbr: 'v', help: 'Print the tool version.')
-    ..addFlag('secure', negatable: true, abbr: 's', help: 'Start the server in TLS mode.')
-    ..addFlag('tcpServer', negatable: true, abbr: 'S', help: 'Start the server in TCP mode. true or false')
-    ..addFlag('websocket', abbr: 'w', negatable: true, help: 'Start the websocket server.')
+    ..addFlag('secure', negatable: false, abbr: 's', help: 'Start the server in TLS mode.')
+    ..addFlag('tcpserver', negatable: false, abbr: 't', help: 'Start the server in TCP mode. true or false')
+    ..addFlag('websocket', abbr: 'w', negatable: false, help: 'Start the websocket server.')
     ..addOption('address', abbr: 'a', help: 'The radio TCP address or serial port name. e.g. -a COM7')
     ..addOption('port_or_baud', abbr: 'p', help: 'The radio TCP port or Serial baud rate. e.g. -p 19200');
 }
@@ -32,7 +32,7 @@ void main(List<String> arguments) {
   String port = '19791';
   bool secure = false;
   bool websocket = false;
-  bool tcpServer = false;
+  bool tcpserver = false;
   final ArgParser argParser = buildParser();
   try {
     final ArgResults results = argParser.parse(arguments);
@@ -53,14 +53,14 @@ void main(List<String> arguments) {
       websocket = true;
     }
     if(results.flag('tcpServer')) {
-      tcpServer = true;
+      tcpserver = true;
     }
     address = results.option('address')??'';
     port = results.option('port_or_baud')??'';    
     print('option address: $address');
     print('option port_or_baud: $port');
     print('option secure: $secure');
-    print('option startserver: $tcpServer');
+    print('option startserver: $tcpserver');
     print('option websocket: $websocket');
     // Act on the arguments provided.
     print('Positional arguments: ${results.rest}');
@@ -78,6 +78,6 @@ void main(List<String> arguments) {
   // TEST
   print('CWD: ${Directory.current}');
   print('Starting ARCON: $arguments');
-  ARCON(arguments.last, address:address, port:port, secure:secure, startServer: tcpServer, websocket: websocket);
+  ARCON(arguments.last, address:address, port:port, secure:secure, tcpServer: tcpserver, websocket: websocket);
   // END TEST
 }
