@@ -177,7 +177,7 @@ class ARCON {
   void writeToClient(List<int> data) {        
     //print('writeToClient: $data $bStartTcpServer $bStartWebsocketServer');
     if(bStartTcpServer) {
-      print('to tcp server');
+      // print('to tcp server');
       if(bSecureClient && bClientConnected) {
         try { sclient.add(data); }
         catch(e) {print('TLS socket send error: $e'); }
@@ -245,7 +245,7 @@ class ARCON {
   /// data is passed to [handleClientCommands] which in turn may pass query
   /// commands to [queryCmd].
   void processClientData(Uint8List data) {
-    // this is an ASCII command port only, so split the commands
+    // This is an ASCII command port only, so split the commands
     // on line end and pass to handler function [handleClientcommands].
     //print('got client data: $data');
     var inbytes = String.fromCharCodes(data.toList());
@@ -405,7 +405,7 @@ class ARCON {
     }
   }
 
-  /// When the user sends a query command on the TCP server socket, then this
+  /// When the user sends a query command on the server socket, then this
   /// function decides what to do with the command and may or may not direct
   /// the radio device in some way.
   void queryCmd(final String cmd) {
@@ -459,15 +459,15 @@ class ARCON {
         // print(cmd); // to check for freqSuffix on the end
         sendRadioCommand(cmd);
       } 
-      else { // CI-V or BCD which are binary so translate
-        if(cmdLines[0].length % 2 > 0) {
-          // bad format for hex encoded string, so drop      
-          cmdLines.removeAt(0);
-          return;
-        }
-        var fromhex = hex.decode(cmdLines[0]);
-        var cmd = Uint8List.fromList(fromhex);
-        sendRadioCommand(cmd);
+      else { // CI-V or BCD
+        // hex encoded binary in hex, so test for proper length
+        // multiple of two (2)
+        if(cmdLines[0].length % 2 == 0) {
+          var fromhex = hex.decode(cmdLines[0]);
+          var cmd = Uint8List.fromList(fromhex);
+          sendRadioCommand(cmd);
+        } // otherwise if bad format, do nothing and just remove the
+          // cmdLine[0] in the next step
       }
       cmdLines.removeAt(0);
       if (cmdLines.isEmpty) {
