@@ -28,8 +28,8 @@ void printUsage(ArgParser argParser) {
 }
 
 void main(List<String> arguments) {  
-  String address = '127.0.0.1';
-  String port = '19791';
+  String address = '';
+  String port = '';
   bool secure = false;
   bool websocket = false;
   bool tcpserver = false;

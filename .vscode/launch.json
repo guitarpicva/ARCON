@@ -34,7 +34,7 @@
             "type": "dart",
             "program": "./bin/arcon.dart",
             "args": [
-                "--websocket", "RadioFiles/AB4MW/FT-450D.json"
+                "-w", "RadioFiles/AB4MW/FT-450D.json"
             ]
         },
         {

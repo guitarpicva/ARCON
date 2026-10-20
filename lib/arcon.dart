@@ -82,7 +82,7 @@ class ARCON {
 
     // load the model for the radio to connect to
     loadRadioFile();
-
+// print('radioAddress: $radioAddress - serialBaudRate: $serialBaudRate - radioTcpPortNumber: $radioTcpPortNumber');
     if(address.isNotEmpty) {
       radioAddress = address;
     }
@@ -94,8 +94,7 @@ class ARCON {
         serialBaudRate = int.parse(port);
       }
     }
-    print('\x1b[35mAddress: $radioAddress -- port: $radioTcpPortNumber/$serialBaudRate\x1b[0m]');
-    // timers for ports were here in C++
+    print('\x1b[35mAddress: $radioAddress -- port: $radioTcpPortNumber baud: $serialBaudRate\x1b[0m]');
     // start the connection to the radio
     startControlConnection();
     // if we wish to start the control TCP
@@ -117,6 +116,7 @@ class ARCON {
     // currently coded to use only the localhost cert/chain/privkey below
     // bSecureClient = true;
     // END TEST
+    print("Start ARCON TCP Server -- ${bSecureClient?"SECURE":"CLEAR"}");
     if(bSecureClient) {
       var context = SecurityContext.defaultContext;
       context.minimumTlsProtocolVersion = TlsProtocolVersion.tls1_2;
@@ -158,11 +158,12 @@ class ARCON {
   }
 
   Future<void> startWebsocketServer() async {
+    print('Start ARCON Websocket server -- CLEAR');
     var wsHandler = webSocketHandler((webSocket, _) {
       wsClientStreamSink = webSocket.sink;
+      bClientConnected = true;
       print('wsClientStreamSink: $wsClientStreamSink');
       webSocket.stream.listen((message) {
-        //webSocket.sink.add('echo $message');
         print('ws message: $message');
         handleClientCommands(<String> [message]);
       });
@@ -174,19 +175,22 @@ class ARCON {
   }
 
   void writeToClient(List<int> data) {        
+    //print('writeToClient: $data $bStartTcpServer $bStartWebsocketServer');
     if(bStartTcpServer) {
-      if(bSecureClient) {
+      print('to tcp server');
+      if(bSecureClient && bClientConnected) {
         try { sclient.add(data); }
         catch(e) {print('TLS socket send error: $e'); }
       }
-      else {
+      else if(bClientConnected) {
         try { client.add(data); }
-        catch(e) {print('TCP socket send error: $e'); }
+        catch(e) { print('TCP socket send error: $e'); }
       }
     }
-    if(bStartWebsocketServer) {
+    if(bStartWebsocketServer && bClientConnected) {
+      //print('to websocket');
       try { wsClientStreamSink.add(data); }
-      catch(e){print('websocket send error:  $e'); }
+      catch(e){ print('websocket send error:  $e'); }
     }
   }
 
@@ -853,29 +857,28 @@ class ARCON {
   }
 
   // When remote control data is complete over the radio connection, handle it.
-  void onRadioDataIn(Uint8List data) {
-    
+  void onRadioDataIn(Uint8List data) {    
     if(freqType == "CAT") {
       indata += String.fromCharCodes(data.toList());
     }
     else {
       indata += hex.encode(data).toUpperCase();
     }
-    print('onRadioDataIn: indata: $indata');
+    //print('onRadioDataIn: indata= $indata');
     writeToClient(indata.codeUnits);
     if(!indata.contains(freqSuffix)) { return; } // to get more
-    List<String> inds = indata.split((freqType == "CI-V") ? "FD" : freqSuffix);
-    // print('show radio in bytes: $inds');
+    List<String> inds = indata.split(freqSuffix);
     indata = indata.substring(indata.lastIndexOf(freqSuffix) + freqSuffix.length);
     for (String ind in inds) {
       // print('onRadioDataIn: ind: $ind');
-      // Check the CI-V commands for ack/nack to discard them
+      // Check the CI-V commands for ack/nack to discard them/
+      // Do this first because each test to CI-V later is inside an "else if"
       if (freqType == "CI-V") {
-        if (ind.endsWith('FB')) {
-          continue;  // ACK
-        }
-        else if (ind.endsWith('FA')) {
-          if (bCmdDebug) {
+        if (ind.endsWith('FB')) { // do this first
+            continue;  // ACK
+          }
+          else if (ind.endsWith('FA')) {
+            if (bCmdDebug) {
             if (bClientConnected) {
               writeToClient('NACK: $ind$crlf'.codeUnits);
             }
@@ -883,12 +886,12 @@ class ARCON {
           continue; // NACK
         }
       }
-      if (bCmdDebug) {
-        if (bClientConnected) {
-          writeToClient('$ind$crlf'.codeUnits);
+      if (bStartTcpServer || bStartWebsocketServer) {        
+        if (bCmdDebug) {
+         if (bClientConnected) {
+            writeToClient('$ind$crlf'.codeUnits);
+          }
         }
-      }
-      if (bStartTcpServer || bStartWebsocketServer) {
         //print('ind: $ind - bCurrVfoA: $bCurrVfoA - vfoAFreqResponse: $vfoAFreqResponse - vfoBFreqResponse: $vfoBFreqResponse');
         if (vfoAResponse.isNotEmpty && ind.startsWith(vfoAResponse)) {
           writeToClient('vfoa$crlf'.codeUnits);
@@ -910,7 +913,7 @@ class ARCON {
               }
             }
           } 
-          else if (freqType == "CI-V") {
+          else if (freqType == "CI-V") {           
             List<String> prefixes = modeResponsePrefix.split(',');
             for (String pre in prefixes) {
               if (ind.startsWith(pre)) {

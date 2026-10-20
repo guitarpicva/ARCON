@@ -11,7 +11,7 @@
         "toVFOA": "VS0",
         "toVFOB": "VS1"
     },
-    "initialSetup": "VS0,MD0C,SH031,AI0",
+    "initialSetup": "VS0,MD0C,SH031,AI1",
     "interCmdDelay": 75,
     "modeList": {
         "AM": "MD05",
@@ -38,7 +38,7 @@
         "vfoBFreqResponse": "FB",
         "vfoBResponse": "VS1"
     },
-    "radioAddress": "ft450d",
+    "radioAddress": "ttyUSB2",
     "radioName": "FT-450D",
     "serialBaudRate": 38400,
     "serialFlowControl": "No Flow Control",
