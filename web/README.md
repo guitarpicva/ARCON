@@ -1,0 +1,1 @@
+This is an example of how to use websockets with javascript and css and html.  It is FAR from complete, but assists anyone wishing to pursue that avenue.  It may change over time, but this is not central the ARCON system, but meant as a "getting started" helper.
