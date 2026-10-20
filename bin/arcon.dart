@@ -52,7 +52,7 @@ void main(List<String> arguments) {
     if(results.flag('websocket')) {
       websocket = true;
     }
-    if(results.flag('tcpServer')) {
+    if(results.flag('tcpserver')) {
       tcpserver = true;
     }
     address = results.option('address')??'';
