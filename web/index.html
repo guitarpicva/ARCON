@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="css/w3.css" type="text/css">
+<link rel="stylesheet" href="css/w3-theme-dark-grey.css" type="text/css">
+<link rel="stylesheet" href="css/xrweb.css" type="text/css">
+<script src="js/client.js" type="text/javascript" defer></script>
+<title>ARCON Web</title>
+</head>
+
+<body onload="loadSettings();">
+<table><th id="tabletitle" colspan="4">ARCON Rules the Radio -- ?</th>
+<tr><td><button onclick="sendCommand('user mute')">Mute On</button></td>
+<td><button onclick="sendCommand('user volm')">Mute Off</button></td>
+<td><button onclick="sendCommand('ptton')">PTT On</button></td>
+<td><button onclick="sendCommand('pttoff')">PTT Off</button></td></tr>
+<tr><td><button onclick="sendCommand('autotune')">Autotune</button></td>
+<td><button onclick="sendCommand('?mode')">Mode?</button></td>
+<td>
+    <select id="modelist" name="modelist" >
+    <option value="USB" selected>USB</option>
+    <option value="LSB">LSB</option>
+    <option value="AM">AM</option>
+    <option value="CW">CW</option>
+    <option value="DATA1">DATA1</option>
+    <option value="DATA2">DATA2</option>
+    <option value="DATA3">DATA3</option>        
+    </select>
+<td>
+    <button onclick="
+        var opts = document.getElementById('modelist').options;
+        var sel = opts.selectedIndex;
+        // console.log(opts);
+        // console.log('selectedIndex: ' + sel);
+        // console.log(opts[sel].innerHTML);
+        setMode(opts[sel].innerHTML)">Set Mode
+    </button>
+</td></tr>
+<tr>
+<td colspan="3">
+    <canvas id="smeter" width="255" height="16"></canvas>
+</td>
+<td id="sval">S?</td>
+</tr>
+<tr>    
+    <td><input type="checkbox" id="debug" onchange="
+        setDebug(document.getElementById('debug').checked);">Show Trace</td>
+</tr>
+</table>
+<div>
+    <textarea cols=55 rows=15 id="trace" style="visibility: hidden;"></textarea>
+    <p>
+        <button style="visibility: hidden" id="cleartext" onclick="document.getElementById('trace').innerHTML = '';">Clear Text</button>
+        <button id="help" onclick="sendCommand('help')">Help</button>
+    </p>
+
+</div>
+<!-- <script>loadSettings() defer;</script> -->
+</body>
+</html>
