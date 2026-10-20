@@ -163,7 +163,7 @@ class ARCON {
       print('wsClientStreamSink: $wsClientStreamSink');
       webSocket.stream.listen((message) {
         //webSocket.sink.add('echo $message');
-        print('message: $message');
+        print('ws message: $message');
         handleClientCommands(<String> [message]);
       });
     });
@@ -173,20 +173,20 @@ class ARCON {
     });
   }
 
-  void writeToClient(List<int> data) {
-    if(bSecureClient) {
-      sclient.add(data);
-      // sclient.flush();
-    }
-    else {
-      if(bStartServer) {
+  void writeToClient(List<int> data) {        
+    if(bStartServer) {
+      if(bSecureClient) {
+        try { sclient.add(data); }
+        catch(e) {print('TLS socket send error: $e'); }
+      }
+      else {
         try { client.add(data); }
         catch(e) {print('TCP socket send error: $e'); }
       }
-      if(bStartWebsocketServer) {
-        try { wsClientStreamSink.add(data); }
-        catch(e){print('websocket send error:  $e'); }
-      }
+    }
+    if(bStartWebsocketServer) {
+      try { wsClientStreamSink.add(data); }
+      catch(e){print('websocket send error:  $e'); }
     }
   }
 
@@ -365,7 +365,7 @@ class ARCON {
         // print('debug: $bCmdDebug');
       }
       else if (cmd.startsWith("version")) {
-        writeToClient('ARCON version: $version\n'.codeUnits);
+        writeToClient('ARCON version: $version -- $radioName\n'.codeUnits);
       }
       else if (cmd.startsWith('quit')) {
         writeToClient('Closed ARCON Control Connection...$crlf'.codeUnits);
@@ -888,8 +888,8 @@ class ARCON {
           writeToClient('$ind$crlf'.codeUnits);
         }
       }
-      if (bClientConnected) {
-        print('ind: $ind - bCurrVfoA: $bCurrVfoA - vfoAFreqResponse: $vfoAFreqResponse - vfoBFreqResponse: $vfoBFreqResponse');
+      if (bStartServer || bStartWebsocketServer) {
+        //print('ind: $ind - bCurrVfoA: $bCurrVfoA - vfoAFreqResponse: $vfoAFreqResponse - vfoBFreqResponse: $vfoBFreqResponse');
         if (vfoAResponse.isNotEmpty && ind.startsWith(vfoAResponse)) {
           writeToClient('vfoa$crlf'.codeUnits);
         } 
@@ -975,10 +975,10 @@ class ARCON {
         }
       }
     }
-    if(bStartWebsocketServer) {
-      // send the response text to the websocket client
-      writeToClient(data);
-    }
+    // if(bStartWebsocketServer) {
+    //   // send the response text to the websocket client
+    //   writeToClient(data);
+    // }
   }
 
   /// Send a single radio command to the radio device either via serial port

@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "bin/arcon.dart",
             "args": [
-                "RadioFiles/AB4MW/IC-F8101.json"
+                "--tcpServer", "RadioFiles/AB4MW/IC-F8101.json"
             ]
         },
         {
@@ -25,7 +25,7 @@
             "request": "launch",
             "program": "bin/arcon.dart",
             "args": [
-                "RadioFiles/AB4MW/KX-3.json"
+                "--tcpServer", "RadioFiles/AB4MW/KX-3.json"
             ]
         },
         {
@@ -43,7 +43,7 @@
             "type": "dart",
             "program": "./bin/arcon.dart",
             "args": [
-                "RadioFiles/ID-4100A.json" 
+                "--tcpServer", "RadioFiles/ID-4100A.json" 
             ]
         },
         {
@@ -52,7 +52,7 @@
             "type": "dart",
             "program": "./bin/arcon.dart",
             "args": [
-                "RadioFiles/AB4MW/CODAN.json"
+                "--tcpServer", "RadioFiles/AB4MW/CODAN.json"
             ]
         }
 
